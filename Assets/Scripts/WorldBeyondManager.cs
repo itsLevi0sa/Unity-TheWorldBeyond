@@ -176,6 +176,9 @@ public class WorldBeyondManager : MonoBehaviour
 #endif
 
         if (MultiToy.Instance) MultiToy.Instance.InitializeToys();
+
+      
+
         _pet.Initialize();
 
         _sceneManager.SceneModelLoadedSuccessfully += SceneModelLoaded;
@@ -275,12 +278,16 @@ public class WorldBeyondManager : MonoBehaviour
                 // Passthrough fading is done in the PlayIntroPassthrough coroutine
                 break;
             case GameChapter.OppyBaitsYou:
+
                 // if either hand is getting close to the toy, grab it and start the experience
                 float handRange = 0.2f;
                 float leftRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch), MultiToy.Instance.transform.position);
                 float rightRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch), MultiToy.Instance.transform.position);
                 bool leftHandApproaching = leftRange <= handRange;
                 bool rightHandApproaching = rightRange <= handRange;
+
+                MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
+                /*
                 if (MultiToy.Instance._toyVisible && (leftHandApproaching || rightHandApproaching))
                 {
                     if (usingHands)
@@ -297,8 +304,10 @@ public class WorldBeyondManager : MonoBehaviour
 
                     _lightBeam.CloseBeam();
                     MultiToy.Instance._grabToy_1.Play();
+                */
                     ForceChapter(GameChapter.SearchForOppy);
-                }
+                
+                
                 break;
             case GameChapter.SearchForOppy:
                 break;
