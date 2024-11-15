@@ -1756,6 +1756,17 @@ AudioSource:
   m_CorrespondingSourceObject: {fileID: 1774305031032359601, guid: cde93055fa51ae14895cbcde3031c6e7, type: 3}
   m_PrefabInstance: {fileID: 605989724}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &795173627 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3064502984631481332, guid: 441ec0f3f814a4d4f8b3bdeeefd7ab1e, type: 3}
+  m_PrefabInstance: {fileID: 1273226969338022286}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c8a77103e67fab4ab69fdd78c07bb70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &812473046 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3689474892515816023, guid: e06ae8cd9650553488e0949aa9da383b, type: 3}
@@ -11938,6 +11949,18 @@ PrefabInstance:
       propertyPath: _rightHandAnchor
       value: 
       objectReference: {fileID: 0}
+    - target: {fileID: 3064502984631481333, guid: 441ec0f3f814a4d4f8b3bdeeefd7ab1e, type: 3}
+      propertyPath: _toys.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064502984631481333, guid: 441ec0f3f814a4d4f8b3bdeeefd7ab1e, type: 3}
+      propertyPath: _toys.Array.data[0]
+      value: 
+      objectReference: {fileID: 795173627}
+    - target: {fileID: 3064502984631481333, guid: 441ec0f3f814a4d4f8b3bdeeefd7ab1e, type: 3}
+      propertyPath: _toys.Array.data[1]
+      value: 
+      objectReference: {fileID: 795173627}
     - target: {fileID: 4263822618446166652, guid: 441ec0f3f814a4d4f8b3bdeeefd7ab1e, type: 3}
       propertyPath: m_Name
       value: MultiToy

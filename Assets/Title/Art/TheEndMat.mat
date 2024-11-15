@@ -119,7 +119,7 @@ Material:
     - __dirty: 0
     - _fogstrength: 0.873
     m_Colors:
-    - _Color: {r: 0.072201, g: 0.072201, b: 0.072201, a: 1}
+    - _Color: {r: 0.1023339, g: 0.1023339, b: 0.1023339, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _OppyPosition: {r: 0, g: 0, b: 0, a: 0}
     - _OzPosition: {r: 0, g: 0, b: 0, a: 0}

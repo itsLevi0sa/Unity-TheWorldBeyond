@@ -97,7 +97,7 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _RimPower: 3
-    - _SaturationAmount: 0.33333334
+    - _SaturationAmount: 0
     - _SaturationDistance: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
