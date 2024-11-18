@@ -278,23 +278,7 @@ public class WorldBeyondManager : MonoBehaviour
             ForceChapter(); // ForceChapter(GameChapter.SearchForOppy);
             SearchForOppy();
         }
-        else if (searchForOppy)
-        {
-
-        }else if (oppyExplores)
-        {
-
-        }else if (greatBeyond)
-        {
-
-        }else if (ending)
-        {
-            if (_endScreen.activeSelf)
-            {
-                PositionTitleScreens(false);
-            }
-        }
-
+        
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
         bool validMode = (oppyExplores ||  greatBeyond);
 
@@ -383,32 +367,12 @@ public class WorldBeyondManager : MonoBehaviour
         _oppyDiscoveryCount = 0;
         _passthroughStylist.ResetPassthrough(0.1f);
         WorldBeyondEnvironment.Instance._sun.enabled = true;
-        StartCoroutine(CountdownToFlashlight(1.0f)); //<-----------------------------COUNTDOWN TO TOY FUNCTIONALITY
-        StartCoroutine(FlickerCameraToClearColor());
-    }
-    void OppyExplores()
-    {
-        AudioManager.SetSnapshot_OppyExploresReality();
-        _passthroughStylist.ResetPassthrough(0.1f);
-        VirtualRoom.Instance.ShowAllWalls(true);
-        VirtualRoom.Instance.SetRoomSaturation(1.0f);
-        StartCoroutine(UnlockWallToy(_usingHands ? 5f : 20.0f));
-        _spaceShipAnimator.StartIdleSound(); // Start idle sound here - mix will mute it.
-    }
-    void GreatBeyond()
-    {
-        AudioManager.SetSnapshot_TheGreatBeyond();
-        _passthroughStylist.ResetPassthrough(0.1f);
-        SetEnvironmentSaturation(IsGreyPassthrough() ? 0.0f : 1.0f);
-        if (IsGreyPassthrough()) StartCoroutine(SaturateEnvironmentColor());
-        MusicManager.Instance.PlayMusic(MusicManager.Instance.PortalOpen);
-        MusicManager.Instance.PlayMusic(MusicManager.Instance.TheGreatBeyondMusic);
-    }
 
-    public void Ending()
-    {
-
+        //---------------------THE MOST IMPORTANT CHUNK----------------------------------------------------------------------------------
+        StartCoroutine(CountdownToFlashlight(0.1f)); //<-----------------------------COUNTDOWN TO TOY FUNCTIONALITY
+        StartCoroutine(FlickerCameraToClearColor());//<-----------------------------THIS ACTUALLY MAKES THE PASSTHROUGH WORK!!!!!!!
     }
+  
 
     public void ForceChapter()
     {
@@ -436,16 +400,6 @@ public class WorldBeyondManager : MonoBehaviour
         }else if (searchForOppy)
         {
             i = 4;
-        }else if (oppyExplores)
-        {
-            i = 5;
-        }else if (greatBeyond)
-        {
-            i = 6;
-        }
-        else if (ending)
-        {
-            i = 7;
         }
 
         MultiToy.Instance.SetToy(i);
@@ -713,7 +667,6 @@ public class WorldBeyondManager : MonoBehaviour
             oppyExplores = false;
             greatBeyond = true;   
             ForceChapter(); //ForceChapter(GameChapter.TheGreatBeyond);
-            GreatBeyond();
         }
     }
 
