@@ -247,11 +247,11 @@ public class BallCollectable : MonoBehaviour
         _rigidBody.AddTorque(randomTorque * 20);
         MultiToy.Instance._ballShoot_1.Play();
         WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.ShootBall);
-        bool canChaseBall = WorldBeyondManager.Instance._currentChapter >= WorldBeyondManager.GameChapter.OppyExploresReality;
+        bool canChaseBall = WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
         if (canChaseBall) WorldBeyondManager.Instance._pet.Listening(false);
         WorldBeyondManager.Instance._pet.HideThought();
         GetComponent<AudioSource>().Stop();
-        _ballAdvancesStory = WorldBeyondManager.Instance._currentChapter >= WorldBeyondManager.GameChapter.TheGreatBeyond;
+        _ballAdvancesStory = WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
         _wasShot = true;
     }
 

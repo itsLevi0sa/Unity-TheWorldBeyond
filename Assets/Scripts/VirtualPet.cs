@@ -212,7 +212,7 @@ public class VirtualPet : MonoBehaviour
         Vector3 headUp = _headBone.transform.rotation * Vector3.right;
         Vector3 lookPosition = _headBone.position + headLook;
 
-        if (WorldBeyondManager.Instance._currentChapter == WorldBeyondManager.GameChapter.OppyExploresReality
+        if (WorldBeyondManager.Instance.oppyExplores
             && MultiToy.Instance.IsWalltoyActive())
         {
             lookPosition = MultiToy.Instance.wallToyTarget.position;
@@ -286,8 +286,7 @@ public class VirtualPet : MonoBehaviour
 
         // get the closest one
         BallCollectable ballBC = WorldBeyondManager.Instance.GetClosestEdibleBall(transform.position);
-        if (WorldBeyondManager.Instance._currentChapter == WorldBeyondManager.GameChapter.OppyExploresReality
-            && MultiToy.Instance.IsWalltoyActive())
+        if (WorldBeyondManager.Instance.oppyExplores  && MultiToy.Instance.IsWalltoyActive())
         {
             SetMoveTarget(MultiToy.Instance.wallToyTarget.position - MultiToy.Instance.wallToyTarget.forward * 0.5f, MultiToy.Instance.wallToyTarget.forward);
             _agent.speed = _walkSpeed;
@@ -384,31 +383,31 @@ public class VirtualPet : MonoBehaviour
         }
     }
 
-    public void SetOppyChapter(WorldBeyondManager.GameChapter newChapter)
+    public void SetOppyChapter(int i)
     {
         StopAllCoroutines();
         ResetAnimFlags();
-        switch (newChapter)
+        switch (i)
         {
-            case WorldBeyondManager.GameChapter.Title:
+            case 1: //Title:
                 WorldBeyondManager.Instance._spaceShipAnimator.StopIdleSound();
                 break;
-            case WorldBeyondManager.GameChapter.Introduction:
+            case 2: // Introduction:
                 _collectedBalls = 0;
                 _oppyState = PetState.Idle;
                 transform.position = _mainCam.position;
                 break;
-            case WorldBeyondManager.GameChapter.OppyBaitsYou:
+            case 3: //OppyBaitsYou:
                 _collectedBalls = 0;
                 _oppyState = PetState.Idle;
                 break;
-            case WorldBeyondManager.GameChapter.SearchForOppy:
+            case 4: //SearchForOppy:
                 _collectedBalls = 0;
                 _oppyState = PetState.Idle;
                 SetMaterialSaturation(0);
                 EnablePassthroughShell(true);
                 break;
-            case WorldBeyondManager.GameChapter.OppyExploresReality:
+            case 5: //OppyExploresReality:
                 WorldBeyondManager.Instance._spaceShipAnimator.StopIdleSound();
                 _collectedBalls = 0;
                 _animator.SetBool("Wonder", true);
@@ -416,13 +415,13 @@ public class VirtualPet : MonoBehaviour
                 EnablePassthroughShell(false);
                 SetLookDirection((_mainCam.position - transform.position).normalized);
                 break;
-            case WorldBeyondManager.GameChapter.TheGreatBeyond:
+            case 6: //TheGreatBeyond:
                 _oppyState = PetState.Idle;
                 _ballEatTarget = null;
                 _animator.SetBool("Wonder", true);
                 EnablePassthroughShell(false);
                 break;
-            case WorldBeyondManager.GameChapter.Ending:
+            case 7: //Ending:
                 EndLookTarget();
                 _agent.SetDestination(WorldBeyondManager.Instance._finalUfoRamp.position);
                 _rampBaseHit = false;
@@ -493,12 +492,12 @@ public class VirtualPet : MonoBehaviour
 
     public void GoToUFO()
     {
-        WorldBeyondManager.Instance.ForceChapter(WorldBeyondManager.GameChapter.Ending);
+        WorldBeyondManager.Instance.ForceChapter(7);
     }
     #endregion AnimEvents
     public bool IsGameOver()
     {
-        bool gameOver = WorldBeyondManager.Instance._currentChapter == WorldBeyondManager.GameChapter.Ending;
+        bool gameOver = WorldBeyondManager.Instance.ending;
         gameOver &= _rampBaseHit;
         return gameOver;
     }
@@ -522,7 +521,7 @@ public class VirtualPet : MonoBehaviour
     public bool CanListen()
     {
         bool canListen = _collectedBalls < WorldBeyondManager.Instance._oppyTargetBallCount;
-        canListen &= WorldBeyondManager.Instance._currentChapter == WorldBeyondManager.GameChapter.TheGreatBeyond;
+        canListen &= WorldBeyondManager.Instance.greatBeyond;
         canListen &= (_oppyState == PetState.Chasing);
         canListen &= (_ballEatTarget == null);
         canListen &= !_animator.GetBool("Petting");

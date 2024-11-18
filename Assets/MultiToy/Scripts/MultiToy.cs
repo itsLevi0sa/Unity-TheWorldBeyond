@@ -77,7 +77,7 @@ public class MultiToy : MonoBehaviour
     /// </summary>
     void HandClosed()
     {
-        if (WorldBeyondManager.Instance._currentChapter >= WorldBeyondManager.GameChapter.SearchForOppy)
+        if (WorldBeyondManager.Instance.searchForOppy || WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending)
         {
             if (_toyIndexHand == (int)ToyOption.WallToy)
             {
@@ -110,13 +110,11 @@ public class MultiToy : MonoBehaviour
 
     void Update()
     {
-        WorldBeyondManager.GameChapter currentChapter = WorldBeyondManager.Instance._currentChapter;
-
         Vector3 controllerPos = Vector3.zero;
         Quaternion controllerRot = Quaternion.identity;
         WorldBeyondManager.Instance.GetDominantHand(ref controllerPos, ref controllerRot);
 
-        if (currentChapter != WorldBeyondManager.GameChapter.OppyBaitsYou)
+        if (WorldBeyondManager.Instance.oppyBaitsYou==false)
         {
             transform.position = controllerPos;
             transform.rotation = controllerRot;
@@ -146,7 +144,7 @@ public class MultiToy : MonoBehaviour
             }
         }
 
-        if (currentChapter == WorldBeyondManager.GameChapter.SearchForOppy)
+        if (WorldBeyondManager.Instance.searchForOppy)
         {
             Vector3 oppyPos = WorldBeyondManager.Instance._pet.transform.position + Vector3.up * 0.2f;
             float oppyDot = Vector3.Dot(GetFlashlightDirection(), (oppyPos - transform.position).normalized);
@@ -167,7 +165,7 @@ public class MultiToy : MonoBehaviour
         {
             _ballTossCooldownFactor += Time.deltaTime;
             currentToyIndex = _toyIndexHand;
-            if (currentChapter >= WorldBeyondManager.GameChapter.SearchForOppy)
+            if (WorldBeyondManager.Instance.searchForOppy || WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending)
             {
                 Transform mainCam = WorldBeyondManager.Instance._mainCamera.transform;
                 bool handOutOfView = Vector3.Dot(mainCam.forward, (controllerPos - mainCam.position).normalized) < 0.5f;
@@ -205,7 +203,7 @@ public class MultiToy : MonoBehaviour
             }
         }
 
-        if (currentChapter >= WorldBeyondManager.GameChapter.SearchForOppy)
+        if (WorldBeyondManager.Instance.searchForOppy || WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending)
         {
             if (currentToyIndex > (int)ToyOption.None)
             {
@@ -346,12 +344,12 @@ public class MultiToy : MonoBehaviour
     /// <summary>
     /// Prepare the proper toy, depending on the story chapter.
     /// </summary>
-    public void SetToy(WorldBeyondManager.GameChapter forcedChapter)
+    public void SetToy(int i)
     {
-        switch (forcedChapter)
+        switch (i)
         {
-            case WorldBeyondManager.GameChapter.Title:
-            case WorldBeyondManager.GameChapter.Introduction:
+            case 1: // Title
+            case 2: //Introduction:
                 DeactivateAllToys();
                 ShowToy(false);
                 _toyIndexController = (int)ToyOption.Flashlight;
@@ -362,18 +360,18 @@ public class MultiToy : MonoBehaviour
                 _flashLightUnlocked = false;
                 _ballTossCooldownFactor = 1.0f;
                 break;
-            case WorldBeyondManager.GameChapter.OppyBaitsYou:
+            case 3: //WorldBeyondManager.GameChapter.OppyBaitsYou:
                 DeactivateAllToys();
                 ShowToy(false);
                 _canSwitchToys = false;
                 _flashLightUnlocked = false;
                 _toyFlashlight.SetLightStrength(WorldBeyondManager.Instance._usingHands ? 0.0f : 1.0f);
                 break;
-            case WorldBeyondManager.GameChapter.SearchForOppy:
+            case 4: // WorldBeyondManager.GameChapter.SearchForOppy:
                 ShowToy(true);
                 _canSwitchToys = false;
                 break;
-            case WorldBeyondManager.GameChapter.OppyExploresReality:
+            case 5: //OppyExploresReality:
                 DeactivateAllToys();
                 ShowToy(true);
                 _toyIndexController = (int)ToyOption.None;
@@ -381,7 +379,7 @@ public class MultiToy : MonoBehaviour
                 _canSwitchToys = false;
                 _wallToyUnlocked = false;
                 break;
-            case WorldBeyondManager.GameChapter.TheGreatBeyond:
+            case 6: //TheGreatBeyond:
                 ShowToy(true);
                 _canSwitchToys = true;
                 if (!WorldBeyondManager.Instance._usingHands)
@@ -389,7 +387,7 @@ public class MultiToy : MonoBehaviour
                     WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.SwitchToy);
                 }
                 break;
-            case WorldBeyondManager.GameChapter.Ending:
+            case 7: //Ending:
                 _canSwitchToys = true;
                 break;
         }
@@ -664,7 +662,7 @@ public class MultiToy : MonoBehaviour
     /// </summary>
     private void OnApplicationFocus(bool pause)
     {
-        if (WorldBeyondManager.Instance._currentChapter >= WorldBeyondManager.GameChapter.SearchForOppy)
+        if (WorldBeyondManager.Instance.searchForOppy || WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending)
         {
             if (_toyIndexController < 0 || _toyIndexController >= _toys.Length || _toys[_toyIndexController] == null)
             {
@@ -687,7 +685,7 @@ public class MultiToy : MonoBehaviour
     {
         if (usingHands)
         {
-            if (_toyVisible && WorldBeyondManager.Instance._currentChapter >= WorldBeyondManager.GameChapter.SearchForOppy)
+            if (WorldBeyondManager.Instance.searchForOppy || WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending)
             {
                 SetToyMesh(ToyOption.None);
             }
@@ -696,7 +694,7 @@ public class MultiToy : MonoBehaviour
         else
         {
             SetToyMesh((ToyOption)_toyIndexController);
-            if (_toyVisible && WorldBeyondManager.Instance._currentChapter >= WorldBeyondManager.GameChapter.SearchForOppy)
+            if (WorldBeyondManager.Instance.searchForOppy || WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending)
             {
                 ShowPassthroughGlove(true, rightHand);
             }

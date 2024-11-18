@@ -7,6 +7,8 @@ using JetBrains.Annotations;
 using Oculus.Interaction;
 using Oculus.Interaction.DistanceReticles;
 using UnityEngine;
+using UnityEngine.UIElements.Experimental;
+using static MixedRealityManager;
 using Random = UnityEngine.Random;
 
 public class WorldBeyondManager : MonoBehaviour
@@ -76,19 +78,6 @@ public class WorldBeyondManager : MonoBehaviour
     PassthroughStylist _passthroughStylist;
     Color _cameraDark = new Color(0, 0, 0, 0.75f);
 
-    public enum GameChapter
-    {
-        Void,               // waiting to find the Scene objects
-        Title,              // the title screen
-        Introduction,       // Passthrough fades in from black
-        OppyBaitsYou,       // light beam is visible
-        SearchForOppy,      // flashlight-hunting for Oppy & balls
-        OppyExploresReality,// Oppy walks around your room
-        TheGreatBeyond,     // room walls come down
-        Ending              // Oppy has collected all balls, flies away in ship
-    };
-    public GameChapter _currentChapter { get; private set; }
-
     [Header("Hands")]
     public OVRSkeleton _leftHand;
     public OVRSkeleton _rightHand;
@@ -117,6 +106,16 @@ public class WorldBeyondManager : MonoBehaviour
 
     private float _leftHandGrabbedBallLastDistance = Mathf.Infinity;
     private float _rightHandGrabbedBallLastDistance = Mathf.Infinity;
+
+    public bool isInVoid = false;
+    public bool isInTitle = false;
+    public bool isInIntroduction = false;
+    public bool oppyBaitsYou = false;
+    public bool searchForOppy = false;
+    public bool oppyExplores = false;
+    public bool greatBeyond = false;
+    public bool ending = false;
+
     private void Awake()
     {
         if (!Instance)
@@ -124,7 +123,8 @@ public class WorldBeyondManager : MonoBehaviour
             Instance = this;
         }
 
-        _currentChapter = GameChapter.Void;
+        isInVoid = true; //_currentChapter = GameChapter.Void;
+
         _gameController = OVRInput.Controller.RTouch;
         _fadeSphere.gameObject.SetActive(true);
         _fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
@@ -247,7 +247,7 @@ public class WorldBeyondManager : MonoBehaviour
         }
 
         // constantly check if the player is within the polygonal floorplan of the room
-        if (_currentChapter >= GameChapter.Title)
+        if (isInVoid==false)
         {
             if (!_vrRoom.IsPlayerInRoom())
             {
@@ -266,67 +266,70 @@ public class WorldBeyondManager : MonoBehaviour
             _rightHandVisual.ForceOffVisibility = !_rightOVR.IsTracked;
         }
 
-        switch (_currentChapter)
+        if (isInVoid)
         {
-            case GameChapter.Void:
-                if (_sceneModelLoaded) GetRoomFromScene();
-                break;
-            case GameChapter.Title:
-                PositionTitleScreens(false);
-                break;
-            case GameChapter.Introduction:
-                // Passthrough fading is done in the PlayIntroPassthrough coroutine
-                break;
-            case GameChapter.OppyBaitsYou:
+            if (_sceneModelLoaded) GetRoomFromScene();
+        }else if (isInTitle)
+        {
+            PositionTitleScreens(false);
+        }else if (isInIntroduction)
+        {
+            // Passthrough fading is done in the PlayIntroPassthrough coroutine
+        }
+        else if (oppyBaitsYou)
+        {
+            // if either hand is getting close to the toy, grab it and start the experience
+            float handRange = 0.2f;
+            float leftRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch), MultiToy.Instance.transform.position);
+            float rightRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch), MultiToy.Instance.transform.position);
+            bool leftHandApproaching = leftRange <= handRange;
+            bool rightHandApproaching = rightRange <= handRange;
 
-                // if either hand is getting close to the toy, grab it and start the experience
-                float handRange = 0.2f;
-                float leftRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch), MultiToy.Instance.transform.position);
-                float rightRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch), MultiToy.Instance.transform.position);
-                bool leftHandApproaching = leftRange <= handRange;
-                bool rightHandApproaching = rightRange <= handRange;
-
-                MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
-                /*
-                if (MultiToy.Instance._toyVisible && (leftHandApproaching || rightHandApproaching))
+            MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
+            /*
+            if (MultiToy.Instance._toyVisible && (leftHandApproaching || rightHandApproaching))
+            {
+                if (usingHands)
                 {
-                    if (usingHands)
-                    {
-                        _gameController = leftRange < rightRange ? OVRInput.Controller.LHand : OVRInput.Controller.RHand;
-                        MultiToy.Instance.SetToyMesh(MultiToy.ToyOption.None);
-                    }
-                    else
-                    {
-                        _gameController = leftRange < rightRange ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;
-                        MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
-                    }
-                    _usingHands = usingHands;
-
-                    _lightBeam.CloseBeam();
-                    MultiToy.Instance._grabToy_1.Play();
-                */
-                    ForceChapter(GameChapter.SearchForOppy);
-                
-                
-                break;
-            case GameChapter.SearchForOppy:
-                break;
-            case GameChapter.OppyExploresReality:
-                break;
-            case GameChapter.TheGreatBeyond:
-                break;
-            case GameChapter.Ending:
-                if (_endScreen.activeSelf)
-                {
-                    PositionTitleScreens(false);
+                    _gameController = leftRange < rightRange ? OVRInput.Controller.LHand : OVRInput.Controller.RHand;
+                    MultiToy.Instance.SetToyMesh(MultiToy.ToyOption.None);
                 }
-                break;
+                else
+                {
+                    _gameController = leftRange < rightRange ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;
+                    MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
+                }
+                _usingHands = usingHands;
+
+                _lightBeam.CloseBeam();
+                MultiToy.Instance._grabToy_1.Play();
+            */
+            oppyBaitsYou = false;
+            searchForOppy = true;
+            SearchForOppy();
+            ForceChapter(4); // ForceChapter(GameChapter.SearchForOppy);
+        }
+        else if (searchForOppy)
+        {
+
+        }else if (oppyExplores)
+        {
+
+        }else if (greatBeyond)
+        {
+
+        }else if (ending)
+        {
+            if (_endScreen.activeSelf)
+            {
+                PositionTitleScreens(false);
+            }
         }
 
         // make sure there's never a situation with no balls to grab
         bool noHiddenBall = (_hiddenBallCollectable == null);
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
-        bool validMode = (_currentChapter > GameChapter.SearchForOppy && _currentChapter < GameChapter.Ending);
+        bool validMode = (oppyExplores ||  greatBeyond);
 
         // note: this logic only executes after Oppy enters reality
         // before that, the experience is scripted, so balls shouldn't spawn so randomly
@@ -347,11 +350,11 @@ public class WorldBeyondManager : MonoBehaviour
         }
 
 
-        bool roomSparkleRingVisible = (_currentChapter >= GameChapter.OppyExploresReality && _hiddenBallCollectable);
-        roomSparkleRingVisible |= (_currentChapter == GameChapter.SearchForOppy && (_pet.gameObject.activeSelf || (_hiddenBallCollectable && !_hiddenBallCollectable._wasShot)));
+        bool roomSparkleRingVisible = (oppyExplores || greatBeyond || ending && _hiddenBallCollectable);
+        roomSparkleRingVisible |= (searchForOppy && (_pet.gameObject.activeSelf || (_hiddenBallCollectable && !_hiddenBallCollectable._wasShot)));
 
         Vector3 ripplePosition = _hiddenBallCollectable ? _hiddenBallPosition : Vector3.one * -1000.0f;
-        if (_currentChapter == GameChapter.SearchForOppy)
+        if (searchForOppy)
         {
             ripplePosition = _pet.gameObject.activeSelf ? _pet.transform.position : ripplePosition;
         }
@@ -418,30 +421,62 @@ public class WorldBeyondManager : MonoBehaviour
         }
     }
 
+    void Void()
+    {
+
+    }
+    void Title()
+    {
+
+    }
+    void Introduction()
+    {
+
+    }
+    void OppyBaitsYou()
+    {
+
+    }
+    void SearchForOppy()
+    {
+
+    }
+    void OppyExplores()
+    {
+
+    }
+    void GreatBeyond()
+    {
+
+    }
+    void Ending()
+    {
+
+    }
+
     /// <summary>
     /// Advance the story line of The World Beyond.
     /// </summary>
-    public void ForceChapter(GameChapter forcedChapter)
+    public void ForceChapter(int i)
     {
         StopAllCoroutines();
         KillControllerVibration();
-        MultiToy.Instance.SetToy(forcedChapter);
-        _currentChapter = forcedChapter;
-        WorldBeyondEnvironment.Instance.ShowEnvironment((int)_currentChapter > (int)GameChapter.SearchForOppy);
+        MultiToy.Instance.SetToy(i);
+        WorldBeyondEnvironment.Instance.ShowEnvironment(oppyExplores || greatBeyond || ending);
 
-        if ((int)_currentChapter < (int)GameChapter.SearchForOppy) _mainCamera.backgroundColor = _cameraDark;
+        if (i < 4) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
 
-        _pet.gameObject.SetActive((int)_currentChapter >= (int)GameChapter.OppyExploresReality);
-        _pet.SetOppyChapter(_currentChapter);
+        _pet.gameObject.SetActive(i >= 5); //(int)_currentChapter >= (int)GameChapter.OppyExploresReality
+        _pet.SetOppyChapter(i);
         _pet.PlaySparkles(false);
 
         if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
         if (_titleScreen) _titleScreen.SetActive(false);
         if (_endScreen) _endScreen.SetActive(false);
 
-        switch (_currentChapter)
+        switch (i)
         {
-            case GameChapter.Title:
+            case 1: //title
                 AudioManager.SetSnapshot_Title();
                 MusicManager.Instance.PlayMusic(MusicManager.Instance.IntroMusic);
                 StartCoroutine(ShowTitleScreen());
@@ -450,17 +485,17 @@ public class WorldBeyondManager : MonoBehaviour
                 WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.None);
                 WorldBeyondEnvironment.Instance._sun.enabled = false;
                 break;
-            case GameChapter.Introduction:
+            case 2: //introduction
                 AudioManager.SetSnapshot_Introduction();
                 VirtualRoom.Instance.ShowDarkRoom(true);
                 VirtualRoom.Instance.AnimateEffectMesh();
                 StartCoroutine(PlayIntroPassthrough());
                 break;
-            case GameChapter.OppyBaitsYou:
+            case 3: //oppy baits you
                 _passthroughStylist.ResetPassthrough(0.1f);
                 StartCoroutine(PlaceToyRandomly(2.0f));
                 break;
-            case GameChapter.SearchForOppy:
+            case 4: //search for oppy
                 VirtualRoom.Instance.HideEffectMesh();
                 _oppyDiscovered = false;
                 _oppyDiscoveryCount = 0;
@@ -470,7 +505,7 @@ public class WorldBeyondManager : MonoBehaviour
                 StartCoroutine(CountdownToFlashlight(5.0f));
                 StartCoroutine(FlickerCameraToClearColor());
                 break;
-            case GameChapter.OppyExploresReality:
+            case 5: //oppy explores
                 AudioManager.SetSnapshot_OppyExploresReality();
                 _passthroughStylist.ResetPassthrough(0.1f);
                 VirtualRoom.Instance.ShowAllWalls(true);
@@ -479,7 +514,7 @@ public class WorldBeyondManager : MonoBehaviour
                 StartCoroutine(UnlockWallToy(_usingHands ? 5f : 20.0f));
                 _spaceShipAnimator.StartIdleSound(); // Start idle sound here - mix will mute it.
                 break;
-            case GameChapter.TheGreatBeyond:
+            case 6: //great beyond
                 AudioManager.SetSnapshot_TheGreatBeyond();
                 _passthroughStylist.ResetPassthrough(0.1f);
                 SetEnvironmentSaturation(IsGreyPassthrough() ? 0.0f : 1.0f);
@@ -490,7 +525,7 @@ public class WorldBeyondManager : MonoBehaviour
             default:
                 break;
         }
-        Debug.Log("TheWorldBeyond: started chapter " + _currentChapter);
+        Debug.Log("TheWorldBeyond: started chapter " + i);
     }
 
     /// <summary>
@@ -549,7 +584,11 @@ public class WorldBeyondManager : MonoBehaviour
         }
 
         yield return new WaitForSeconds(3.0f);
-        ForceChapter(GameChapter.OppyBaitsYou);
+
+        isInIntroduction = false;
+        oppyBaitsYou = true;
+        OppyBaitsYou();
+        ForceChapter(3); //ForceChapter(GameChapter.OppyBaitsYou);
     }
 
     /// <summary>
@@ -624,7 +663,10 @@ public class WorldBeyondManager : MonoBehaviour
             }
             yield return null;
         }
-        ForceChapter(GameChapter.Introduction);
+        isInTitle = false;
+        isInIntroduction = true;
+        Introduction();
+        ForceChapter(2); //ForceChapter(GameChapter.Introduction);
     }
 
     /// <summary>
@@ -735,7 +777,10 @@ public class WorldBeyondManager : MonoBehaviour
                 WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.ERROR_USER_STARTED_OUTSIDE_OF_ROOM);
             }
             WorldBeyondEnvironment.Instance.Initialize();
-            ForceChapter(GameChapter.Title);
+            isInVoid = false;
+            isInTitle = true;
+            Title();
+            ForceChapter(1); //ForceChapter(GameChapter.Title);
         }
         catch
         {
@@ -762,7 +807,7 @@ public class WorldBeyondManager : MonoBehaviour
         {
             return;
         }
-        if (_currentChapter == GameChapter.SearchForOppy)
+        if (searchForOppy)
         {
             // in case we already picked up a ball and triggered the coroutine, cancel the old one
             // this is only a problem when using hands, since the balls stay around
@@ -875,8 +920,10 @@ public class WorldBeyondManager : MonoBehaviour
             }
             yield return null;
         }
-
-        ForceChapter(GameChapter.OppyExploresReality);
+        searchForOppy = false;
+        oppyExplores = true;
+        OppyExplores();
+        ForceChapter(5); //ForceChapter(GameChapter.OppyExploresReality);
         _pet.EndLookTarget();
     }
 
@@ -1008,10 +1055,13 @@ public class WorldBeyondManager : MonoBehaviour
             }
         }
 
-        if (_currentChapter == WorldBeyondManager.GameChapter.OppyExploresReality)
+        if (oppyExplores)
         {
             WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.None);
-            ForceChapter(GameChapter.TheGreatBeyond);
+            oppyExplores = false;
+            greatBeyond = true;
+            GreatBeyond();
+            ForceChapter(6); //ForceChapter(GameChapter.TheGreatBeyond);
         }
     }
 
@@ -1266,7 +1316,10 @@ public class WorldBeyondManager : MonoBehaviour
 
             AudioManager.SetSnapshot_Reset();
             yield return new WaitForSeconds(13.0f);
-            ForceChapter(GameChapter.Title);
+            ending = false;
+            isInTitle = true;
+            Title();
+            ForceChapter(1); // ForceChapter(GameChapter.Title);
         }
     }
 
@@ -1318,8 +1371,8 @@ public class WorldBeyondManager : MonoBehaviour
         Vector3 pitch = Vector3.Lerp(Vector3.down * 0.05f, Vector3.up * 0.05f, Mathf.Clamp01(_titleFadeTimer / 8.0f));
         Quaternion targetRotation = Quaternion.LookRotation(-targetLook + pitch, Vector3.up);
 
-        float dollyDirection = _currentChapter == GameChapter.Title ? -1.0f : 1.0f;
-        float textDistance = (_currentChapter == GameChapter.Title ? 5 : 4) + (dollyDirection * _titleFadeTimer * 0.1f);
+        float dollyDirection = isInTitle ? -1.0f : 1.0f;
+        float textDistance = (isInTitle ? 5 : 4) + (dollyDirection * _titleFadeTimer * 0.1f);
 
         _titleScreen.transform.position = _mainCamera.transform.position + targetLook * textDistance;
         _titleScreen.transform.rotation = targetRotation;

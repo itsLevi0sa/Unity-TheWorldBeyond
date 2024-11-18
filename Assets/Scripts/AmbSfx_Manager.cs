@@ -69,14 +69,14 @@ public class AmbSfx_Manager : MonoBehaviour
     {
         if (!_isPlaying)
         {
-            if (WorldBeyondManager.Instance._currentChapter == WorldBeyondManager.GameChapter.TheGreatBeyond)
+            if (WorldBeyondManager.Instance.greatBeyond)
             {
                 SetEnabled(true);
             }
         }
         else
         {
-            if (WorldBeyondManager.Instance._currentChapter == WorldBeyondManager.GameChapter.Title)
+            if (WorldBeyondManager.Instance.isInTitle)
             {
                 SetEnabled(false);
             }

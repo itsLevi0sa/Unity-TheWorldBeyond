@@ -15,7 +15,7 @@ public class BallShooter : WorldBeyondToy
         else
         {
             // play "no balls" sound
-            if (WorldBeyondManager.Instance._currentChapter == WorldBeyondManager.GameChapter.TheGreatBeyond)
+            if (WorldBeyondManager.Instance.greatBeyond)
             {
                 WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.NoBalls);
             }

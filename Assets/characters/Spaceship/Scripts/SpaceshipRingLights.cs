@@ -128,7 +128,7 @@ public class SpaceshipRingLights : MonoBehaviour
 
     private void Update()
     {
-        if (WorldBeyondManager.Instance._currentChapter < WorldBeyondManager.GameChapter.Ending)
+        if (WorldBeyondManager.Instance.ending)
         {
             return;
         }
