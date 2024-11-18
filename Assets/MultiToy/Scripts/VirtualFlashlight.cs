@@ -62,11 +62,6 @@ public class VirtualFlashlight : WorldBeyondToy
         _effectAccel = Mathf.Clamp(_effectAccel, -0.2f, 0.05f) + rotationOffset;
         _effectTimer += Time.deltaTime * _effectAccel;
         _magicEffectCone.material.SetFloat("_ScrollAmount", _effectTimer);
-
-        if (_isActivated && _absorbingBall)
-        {
-            WorldBeyondManager.Instance.AffectDebris(transform.position, false);
-        }
     }
 
     public void SetLightStrength(float strength)

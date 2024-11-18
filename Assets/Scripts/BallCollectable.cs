@@ -102,35 +102,6 @@ public class BallCollectable : MonoBehaviour
         _rigidBody.useGravity = !_absorbing;
         _absorbing = false;
 
-        if (_ballState == BallStatus.Released)
-        {
-            _shotTimer += Time.deltaTime;
-        }
-        else if (_ballState == BallStatus.Eaten)
-        {
-            // sometimes the Oppy eat animation gets interrupted
-            // in that case, the ball needs to be reset so it can be absorbed by the player
-            _eatStartCooldown += Time.deltaTime;
-            if (_eatStartCooldown >= 2.0f)
-            {
-                _ballState = BallStatus.Available;
-            }
-        }
-        else if (_ballState == BallStatus.Grabbed)
-        {
-            Vector3 targetPos = MultiToy.Instance.transform.position;
-            if (!WorldBeyondManager.Instance._usingHands)
-            {
-                transform.position = Vector3.Lerp(transform.position, targetPos, 0.2f);
-
-                if (Vector3.Distance(transform.position, targetPos) <= 0.05f)
-                {
-                    WorldBeyondManager.Instance.RemoveBallFromWorld(this);
-                    WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.BallSearch);
-                }
-            }
-        }
-
         // collide the shadow with room objects
         LayerMask effectLayer = LayerMask.GetMask("RoomBox", "Furniture");
         float shadowDist = 100.0f;
@@ -232,7 +203,6 @@ public class BallCollectable : MonoBehaviour
         _rigidBody.isKinematic = true;
         _shellObject.enabled = true;
         SetState(BallStatus.Hidden);
-        WorldBeyondManager.Instance.AddBallToWorld(this);
         Debug.Log("TWB placed ball: " + transform.position);
     }
 
@@ -253,24 +223,6 @@ public class BallCollectable : MonoBehaviour
         _wasShot = true;
     }
 
-    /// <summary>
-    /// Only called when using hands, triggered by an event (check the prefab)
-    /// </summary>
-    public void Grab()
-    {
-        if (MultiToy.Instance) MultiToy.Instance.GrabBall(this);
-    }
-
-    /// <summary>
-    /// Only called when using hands, triggered by an event (check the prefab)
-    /// </summary>
-    public void Throw()
-    {
-        ForceVisible();
-        Shoot(transform.position, MultiToy.Instance.GetFlashlightDirection());
-        MultiToy.Instance.ThrewBall();
-        //if (WitConnector.Instance) WitConnector.Instance.WitSwitcher(false);
-    }
 
     /// <summary>
     /// Entry point for properly destroying ball.
@@ -284,7 +236,6 @@ public class BallCollectable : MonoBehaviour
         popFX.transform.rotation = Quaternion.LookRotation(effectFwd);
         popFX.GetComponent<ParticleSystem>().Play();
         _sfxBallLoop.Stop();
-        WorldBeyondManager.Instance.RemoveBallFromWorld(this);
     }
 
     /// <summary>
@@ -401,9 +352,6 @@ public class BallCollectable : MonoBehaviour
             Vector3 randomTorque = new Vector3(Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f), Random.Range(-1.0f, 1.0f));
             debrisInstance.GetComponent<Rigidbody>().AddTorque(randomTorque * Random.Range(1.0f, 2.0f), ForceMode.Impulse);
 
-            // track the debris so we can delete some if too many spawn
-            WorldBeyondManager.Instance.AddBallDebrisToWorld(debrisInstance);
         }
-        WorldBeyondManager.Instance.DeleteOldDebris();
     }
 }

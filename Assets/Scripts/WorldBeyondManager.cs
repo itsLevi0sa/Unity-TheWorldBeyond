@@ -701,54 +701,6 @@ public class WorldBeyondManager : MonoBehaviour
     }
 
     /// <summary>
-    /// When the flashlight shines on an energy ball, advance the story and handle the UI message.
-    /// </summary>
-    public void DiscoveredBall(BallCollectable collected)
-    {
-        WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.BallSearch);
-        WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.NoBalls);
-
-        // when using hands, make sure the discovered ball was actually hidden
-        // otherwise, grabbing any ball will advance the script in undesirable ways
-        if (_usingHands && collected._wasShot)
-        {
-            return;
-        }
-        if (searchForOppy)
-        {
-            // in case we already picked up a ball and triggered the coroutine, cancel the old one
-            // this is only a problem when using hands, since the balls stay around
-            if (_usingHands)
-            {
-                StopAllCoroutines();
-            }
-        }
-    }
-
-    /// <summary>
-    /// Get the closest ball to Oppy that's available to be eaten. (some are intentionally unavailable, like hidden ones)
-    /// </summary>
-    public BallCollectable GetClosestEdibleBall(Vector3 petPosition)
-    {
-        float closestDist = 20.0f;
-        BallCollectable closestBall = null;
-       
-        return closestBall;
-    }
-
-    /// <summary>
-    /// Simple cone to find the best candidate ball within view of the flashlight
-    /// </summary>
-    public BallCollectable GetTargetedBall(Vector3 toyPos, Vector3 toyFwd)
-    {
-        float closestAngle = 0.9f;
-
-        BallCollectable closestBall = null;
-        
-        return closestBall;
-    }
-
-    /// <summary>
     /// When discovering Oppy for the last time, the flashlight dies temporarily as she "pops" into reality.
     /// </summary>
     IEnumerator MalfunctionFlashlight()
@@ -820,16 +772,6 @@ public class WorldBeyondManager : MonoBehaviour
             yield return null;
         }
 
-
-        // hide Oppy
-        _oppyDiscovered = false;
-        _oppyDiscoveryCount++;
-        float colorSaturation = IsGreyPassthrough() ? Mathf.Clamp01(_oppyDiscoveryCount / 3.0f) : 1.0f;
-
-
-        // increase room saturation while flashlight is off
-        VirtualRoom.Instance.SetRoomSaturation(colorSaturation);
-
         // flicker in
         timer = 0.0f;
         while (timer <= lerpTime)
@@ -843,28 +785,6 @@ public class WorldBeyondManager : MonoBehaviour
             yield return null;
         }
         MultiToy.Instance._flashlightLoop_1.Resume();
-
-        if (_oppyDiscoveryCount == 1)
-        {
-            WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.BallSearch);
-            
-        }
-        else
-        {
-
-        }
-    }
-
-
-    /// <summary>
-    /// When the player has the flashlight active, there should always be a hidden ball to discover.
-    /// </summary>
-    void SpawnHiddenBall()
-    {
-        // if spawning on a wall, track the id:
-        // if the wall is toggled off, we need to destroy the ball
-        int wallID = -1;
-        
     }
 
     /// <summary>
@@ -941,73 +861,6 @@ public class WorldBeyondManager : MonoBehaviour
         }
 
         randomPos = new Vector3(randomPos.x, GetFloorHeight(), randomPos.z);
-        return randomPos;
-    }
-
-    /// <summary>
-    /// Find a room surface upon which to spawn a hidden ball.
-    /// </summary>
-    public Vector3 GetRandomBallPosition(ref int wallID)
-    {
-        // default case; spawn it randomly on the floor, which has to exist
-        List<Vector3> randomPositions = new List<Vector3>();
-        List<int> matchingWallID = new List<int>();
-
-        const int numSamples = 8;
-        for (int i = 0; i < numSamples; i++)
-        {
-            // try a random position in front of player
-            float localX = Random.Range(-1.0f, 1.0f);
-            float localY = Random.Range(-1.0f, 1.0f);
-            float localZ = Random.Range(0.0f, 1.0f);
-            Vector3 randomVector = _mainCamera.transform.rotation * (new Vector3(localX, localY, localZ).normalized);
-            LayerMask ballSpawnLayer = LayerMask.GetMask("RoomBox", "Furniture");
-            RaycastHit[] roomboxHit = Physics.RaycastAll(MultiToy.Instance.transform.position, randomVector, 100, ballSpawnLayer);
-            float closestSurface = 100.0f;
-            bool foundSurface = false;
-            Vector3 bestPos = Vector3.zero;
-            int bestID = -1;
-            foreach (RaycastHit hit in roomboxHit)
-            {
-                GameObject hitObj = hit.collider.gameObject;
-                if (hitObj.GetComponent<WorldBeyondRoomObject>() && !hitObj.GetComponent<WorldBeyondRoomObject>()._passthroughWallActive)
-                {
-                    // don't spawn hidden balls on open walls
-                    continue;
-                }
-                // need to find the closest impact, because hit order isn't guaranteed
-                float thisHit = Vector3.Distance(MultiToy.Instance.transform.position, hit.point);
-                if (thisHit < closestSurface)
-                {
-                    foundSurface = true;
-                    closestSurface = thisHit;
-                    int surfId = -1;
-                    if (hitObj.GetComponent<WorldBeyondRoomObject>())
-                    {
-                        surfId = hitObj.GetComponent<WorldBeyondRoomObject>()._surfaceID;
-                    }
-                    bestID = surfId;
-                    bestPos = hit.point + hit.normal * 0.06f;
-                }
-            }
-
-            if (foundSurface)
-            {
-                randomPositions.Add(bestPos);
-                matchingWallID.Add(bestID);
-            }
-            Debug.Log("TWB found ball position: " + foundSurface);
-        }
-
-        // default position, on the floor
-        Vector3 randomPos = VirtualRoom.Instance.GetSimpleFloorPosition() + Vector3.up * 0.05f;
-        if (randomPositions.Count > 0)
-        {
-            int randomSelection = Random.Range(0, randomPositions.Count);
-            randomPos = randomPositions[randomSelection];
-            wallID = matchingWallID[randomSelection];
-        }
-
         return randomPos;
     }
 
@@ -1129,7 +982,6 @@ public class WorldBeyondManager : MonoBehaviour
                     PositionTitleScreens(true);
                     _fadeSphere.sharedMaterial.SetColor("_Color", Color.white);
                     MultiToy.Instance.EndGame();
-                    DestroyAllBalls();
                     _spaceShipAnimator.ResetAnim();
                 }
                 yield return null;
@@ -1141,35 +993,6 @@ public class WorldBeyondManager : MonoBehaviour
             isInTitle = true;
             ForceChapter(); // ForceChapter(GameChapter.Title);
             Title();
-        }
-    }
-
-    /// <summary>
-    /// Choose a random animation for Oppy to play when the flashlight shines on her.
-    /// </summary>
-    public void PlayOppyDiscoveryAnim()
-    {
-        if (!_oppyDiscovered)
-        {
-            _oppyDiscovered = true;
-            // the final discovery, after which Oppy enters reality
-            if (_oppyDiscoveryCount == 2)
-            {
-              
-                StartCoroutine(MalfunctionFlashlight());
-            }
-            // first discovery, play the unique discovery anim
-            else if (_oppyDiscoveryCount == 0)
-            {
-               
-                StartCoroutine(FlickerFlashlight(4.0f));
-            }
-            // second discovery, play a random "delight" anim
-            else
-            {
-               
-                StartCoroutine(FlickerFlashlight(2.0f));
-            }
         }
     }
 
@@ -1235,111 +1058,6 @@ public class WorldBeyondManager : MonoBehaviour
             SetEnvironmentSaturation(normTime);
             yield return null;
         }
-    }
-
-    /// <summary>
-    /// Track the balls in the game so they can be safely managed.
-    /// </summary>
-    public void AddBallToWorld(BallCollectable newBall)
-    {
- 
-    }
-
-    /// <summary>
-    /// When debris is created from a ball collision, track and delete the old pieces so we don't overflow.
-    /// </summary>
-    public void AddBallDebrisToWorld(GameObject newDebris)
-    {
-        //_ballDebrisObjects.Add(newDebris.GetComponent<BallDebris>());
-    }
-
-    /// <summary>
-    /// Perform physics on the debris gems, from a position.
-    /// </summary>
-    public void AffectDebris(Vector3 effectPosition, bool repel)
-    {
-        /*
-        for (int i = 0; i < _ballDebrisObjects.Count; i++)
-        {
-            if (_ballDebrisObjects[i] != null)
-            {
-                Vector3 forceDirection = _ballDebrisObjects[i].transform.position - effectPosition;
-                if (repel)
-                {
-                    if (forceDirection.magnitude < 0.5f)
-                    {
-                        float strength = 1.0f - Mathf.Clamp01(forceDirection.magnitude * 2);
-                        _ballDebrisObjects[i].AddForce(forceDirection.normalized, strength * 2);
-                    }
-                }
-                else // absorb
-                {
-                    float range = Vector3.Dot(MultiToy.Instance.GetFlashlightDirection(), -forceDirection.normalized);
-                    if (range < -0.8f)
-                    {
-                        float strength = (-range - 0.8f) / 0.2f;
-                        _ballDebrisObjects[i].AddForce(-forceDirection.normalized, strength);
-                    }
-                }
-            }
-        }
-        */
-    }
-
-    /// <summary>
-    /// When new debris has been created from a ball collision, delete old debris to manage performance.
-    /// </summary>
-    public void DeleteOldDebris()
-    {
-        /*
-        _ballDebrisObjects.RemoveAll(item => item == null);
-        // there's too much debris in the world, start removing some FIFO
-        if (_ballDebrisObjects.Count > _maxBallDebris)
-        {
-            int ballsToDestroy = _ballDebrisObjects.Count - _maxBallDebris;
-            for (int i = 0; i < ballsToDestroy; i++)
-            {
-                // this shrinks the item before self-destructing
-                _ballDebrisObjects[i].Kill();
-            }
-        }
-        */
-    }
-
-    /// <summary>
-    /// A central place to manage ball deletion, such as during Multitoy absorption or death
-    /// </summary>
-    public void RemoveBallFromWorld(BallCollectable newBall)
-    {
-        Destroy(newBall.gameObject);
-    }
-
-    /// <summary>
-    /// Destroy all balls and their debris, when the game ends.
-    /// </summary>
-    void DestroyAllBalls()
-    {
-        /*
-        foreach (Transform child in _ballContainer)
-        {
-            if (child != null)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-        if (_hiddenBallCollectable)
-        {
-            Destroy(_hiddenBallCollectable.gameObject);
-        }
-        // destroy debris also
-        foreach (BallDebris child in _ballDebrisObjects)
-        {
-            if (child != null)
-            {
-                Destroy(child.gameObject);
-            }
-        }
-        */
     }
 
     /// <summary>

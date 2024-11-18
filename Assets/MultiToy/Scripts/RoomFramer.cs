@@ -69,7 +69,7 @@ public class RoomFramer : WorldBeyondToy
         pointerSparks.transform.position = _hoveredPoint;
         pointerSparks.transform.rotation = Quaternion.Lerp(pointerSparks.transform.rotation, Quaternion.LookRotation(-_hoveredNormal), 0.3f);
 
-        WorldBeyondManager.Instance.AffectDebris(_hoveredPoint, true);
+       // WorldBeyondManager.Instance.AffectDebris(_hoveredPoint, true);
     }
 
     public override void ActionUp()

@@ -212,28 +212,6 @@ public class MultiToy : MonoBehaviour
                     _toys[currentToyIndex].Action();
                 }
             }
-
-            BallCollectable tbc = WorldBeyondManager.Instance.GetTargetedBall(transform.position, transform.forward);
-            if (tbc)
-            {
-                if (tbc._ballState == BallCollectable.BallStatus.Available ||
-                    tbc._ballState == BallCollectable.BallStatus.Hidden ||
-                    tbc._ballState == BallCollectable.BallStatus.Released)
-                {
-                    if (!WorldBeyondManager.Instance._usingHands)
-                    {
-                        if (IsFlashlightAbsorbing())
-                        {
-                            tbc.Absorbing((tbc.transform.position - transform.position).normalized);
-                            if (tbc.IsBallAbsorbed())
-                            {
-                                tbc.AbsorbBall();
-                                WorldBeyondManager.Instance.DiscoveredBall(_grabbedBall);
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 
@@ -577,36 +555,7 @@ public class MultiToy : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Handle when a ball is grabbed, when using hands only.
-    /// </summary>
-    public void GrabBall(BallCollectable bc)
-    {
-        if (_grabbedBall)
-        {
-            return;
-        }
-        bc.AbsorbBall();
-        bc.SetState(BallCollectable.BallStatus.Grabbed);
-        _grabbedBall = bc;
-        WorldBeyondManager.Instance.DiscoveredBall(bc);
-        WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.BallSearch);
-
-        if (!_throwBallTaught)
-        {
-            WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.ShootBall);
-            _throwBallTaught = true;
-        }
-    }
-
-    /// <summary>
-    /// Handle when a ball is thrown, when using hands only.
-    /// </summary>
-    public void ThrewBall()
-    {
-        _ballTossCooldownFactor = 0.0f;
-        _grabbedBall = null;
-    }
+    
 
     /// <summary>
     /// When using hands, disable the toy's collision.
