@@ -306,8 +306,8 @@ public class WorldBeyondManager : MonoBehaviour
             */
             oppyBaitsYou = false;
             searchForOppy = true;
+            ForceChapter(); // ForceChapter(GameChapter.SearchForOppy);
             SearchForOppy();
-            ForceChapter(4); // ForceChapter(GameChapter.SearchForOppy);
         }
         else if (searchForOppy)
         {
@@ -427,36 +427,114 @@ public class WorldBeyondManager : MonoBehaviour
     }
     void Title()
     {
-
+        AudioManager.SetSnapshot_Title();
+        MusicManager.Instance.PlayMusic(MusicManager.Instance.IntroMusic);
+        StartCoroutine(ShowTitleScreen());
+        VirtualRoom.Instance.ShowAllWalls(false);
+        VirtualRoom.Instance.HideEffectMesh();
+        WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.None);
+        WorldBeyondEnvironment.Instance._sun.enabled = false;
     }
     void Introduction()
     {
-
+        AudioManager.SetSnapshot_Introduction();
+        VirtualRoom.Instance.ShowDarkRoom(true);
+        VirtualRoom.Instance.AnimateEffectMesh();
+        StartCoroutine(PlayIntroPassthrough());
     }
     void OppyBaitsYou()
     {
-
+        _passthroughStylist.ResetPassthrough(0.1f);
+        StartCoroutine(PlaceToyRandomly(2.0f));
     }
     void SearchForOppy()
     {
-
+        VirtualRoom.Instance.HideEffectMesh();
+        _oppyDiscovered = false;
+        _oppyDiscoveryCount = 0;
+        _ballCount = _startingBallCount;
+        _passthroughStylist.ResetPassthrough(0.1f);
+        WorldBeyondEnvironment.Instance._sun.enabled = true;
+        StartCoroutine(CountdownToFlashlight(5.0f));
+        StartCoroutine(FlickerCameraToClearColor());
     }
     void OppyExplores()
     {
-
+        AudioManager.SetSnapshot_OppyExploresReality();
+        _passthroughStylist.ResetPassthrough(0.1f);
+        VirtualRoom.Instance.ShowAllWalls(true);
+        VirtualRoom.Instance.SetRoomSaturation(1.0f);
+        StartCoroutine(UnlockBallShooter(_usingHands ? 0f : 5.0f));
+        StartCoroutine(UnlockWallToy(_usingHands ? 5f : 20.0f));
+        _spaceShipAnimator.StartIdleSound(); // Start idle sound here - mix will mute it.
     }
     void GreatBeyond()
     {
-
+        AudioManager.SetSnapshot_TheGreatBeyond();
+        _passthroughStylist.ResetPassthrough(0.1f);
+        SetEnvironmentSaturation(IsGreyPassthrough() ? 0.0f : 1.0f);
+        if (IsGreyPassthrough()) StartCoroutine(SaturateEnvironmentColor());
+        MusicManager.Instance.PlayMusic(MusicManager.Instance.PortalOpen);
+        MusicManager.Instance.PlayMusic(MusicManager.Instance.TheGreatBeyondMusic);
     }
-    void Ending()
+
+    public void Ending()
     {
 
+    }
+
+    public void ForceChapter()
+    {
+        StopAllCoroutines();
+        KillControllerVibration();
+        //MultiToy.Instance.SetToy(i);
+        WorldBeyondEnvironment.Instance.ShowEnvironment(oppyExplores || greatBeyond || ending);
+
+        if (isInVoid || isInTitle || isInIntroduction || oppyBaitsYou) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
+
+        _pet.gameObject.SetActive(oppyExplores || greatBeyond || ending); //(int)_currentChapter >= (int)GameChapter.OppyExploresReality
+        int i = 0;
+        if (isInVoid)
+        {
+            i = 0;
+        }else if(isInTitle)
+        {
+            i = 1;
+        }else if( isInIntroduction)
+        {
+            i = 2;
+        }else if (oppyBaitsYou)
+        {
+            i = 3;
+        }else if (searchForOppy)
+        {
+            i = 4;
+        }else if (oppyExplores)
+        {
+            i = 5;
+        }else if (greatBeyond)
+        {
+            i = 6;
+        }
+        else if (ending)
+        {
+            i = 7;
+        }
+
+        MultiToy.Instance.SetToy(i);
+        _pet.SetOppyChapter(i);
+        _pet.PlaySparkles(false);
+
+        if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
+        if (_titleScreen) _titleScreen.SetActive(false);
+        if (_endScreen) _endScreen.SetActive(false);
     }
 
     /// <summary>
     /// Advance the story line of The World Beyond.
     /// </summary>
+    /// 
+    /*
     public void ForceChapter(int i)
     {
         StopAllCoroutines();
@@ -527,6 +605,7 @@ public class WorldBeyondManager : MonoBehaviour
         }
         Debug.Log("TheWorldBeyond: started chapter " + i);
     }
+    */
 
     /// <summary>
     /// After the title screen fades to black, start the transition from black to darkened-Passthrough.
@@ -586,9 +665,9 @@ public class WorldBeyondManager : MonoBehaviour
         yield return new WaitForSeconds(3.0f);
 
         isInIntroduction = false;
-        oppyBaitsYou = true;
+        oppyBaitsYou = true;       
+        ForceChapter(); //ForceChapter(GameChapter.OppyBaitsYou);
         OppyBaitsYou();
-        ForceChapter(3); //ForceChapter(GameChapter.OppyBaitsYou);
     }
 
     /// <summary>
@@ -664,9 +743,9 @@ public class WorldBeyondManager : MonoBehaviour
             yield return null;
         }
         isInTitle = false;
-        isInIntroduction = true;
+        isInIntroduction = true;  
+        ForceChapter(); //ForceChapter(GameChapter.Introduction);#
         Introduction();
-        ForceChapter(2); //ForceChapter(GameChapter.Introduction);
     }
 
     /// <summary>
@@ -779,8 +858,8 @@ public class WorldBeyondManager : MonoBehaviour
             WorldBeyondEnvironment.Instance.Initialize();
             isInVoid = false;
             isInTitle = true;
+            ForceChapter(); //ForceChapter(GameChapter.Title);
             Title();
-            ForceChapter(1); //ForceChapter(GameChapter.Title);
         }
         catch
         {
@@ -922,8 +1001,9 @@ public class WorldBeyondManager : MonoBehaviour
         }
         searchForOppy = false;
         oppyExplores = true;
+        ForceChapter();
         OppyExplores();
-        ForceChapter(5); //ForceChapter(GameChapter.OppyExploresReality);
+         //ForceChapter(GameChapter.OppyExploresReality);
         _pet.EndLookTarget();
     }
 
@@ -1059,9 +1139,9 @@ public class WorldBeyondManager : MonoBehaviour
         {
             WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.None);
             oppyExplores = false;
-            greatBeyond = true;
+            greatBeyond = true;   
+            ForceChapter(); //ForceChapter(GameChapter.TheGreatBeyond);
             GreatBeyond();
-            ForceChapter(6); //ForceChapter(GameChapter.TheGreatBeyond);
         }
     }
 
@@ -1318,8 +1398,8 @@ public class WorldBeyondManager : MonoBehaviour
             yield return new WaitForSeconds(13.0f);
             ending = false;
             isInTitle = true;
+            ForceChapter(); // ForceChapter(GameChapter.Title);
             Title();
-            ForceChapter(1); // ForceChapter(GameChapter.Title);
         }
     }
 

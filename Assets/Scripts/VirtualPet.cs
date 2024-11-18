@@ -492,7 +492,9 @@ public class VirtualPet : MonoBehaviour
 
     public void GoToUFO()
     {
-        WorldBeyondManager.Instance.ForceChapter(7);
+        WorldBeyondManager.Instance.ForceChapter();
+        WorldBeyondManager.Instance.ending = true;
+        WorldBeyondManager.Instance.Ending();
     }
     #endregion AnimEvents
     public bool IsGameOver()
