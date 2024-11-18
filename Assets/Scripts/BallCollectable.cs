@@ -161,7 +161,7 @@ public class BallCollectable : MonoBehaviour
 
             if (restedOnFurniture)
             {
-                Vector3 ejectDirection = (WorldBeyondManager.Instance._pet.transform.position - transform.position).normalized + Vector3.up;
+                Vector3 ejectDirection = (transform.position).normalized + Vector3.up;
                 Shoot(transform.position, ejectDirection.normalized * _ungrabbableShotStrengthMultiplier);
             }
         }
@@ -248,8 +248,6 @@ public class BallCollectable : MonoBehaviour
         MultiToy.Instance._ballShoot_1.Play();
         WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.ShootBall);
         bool canChaseBall = WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
-        if (canChaseBall) WorldBeyondManager.Instance._pet.Listening(false);
-        WorldBeyondManager.Instance._pet.HideThought();
         GetComponent<AudioSource>().Stop();
         _ballAdvancesStory = WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
         _wasShot = true;
