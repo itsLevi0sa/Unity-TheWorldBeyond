@@ -2,6 +2,7 @@
 
 using UnityEngine;
 
+/*
 public class ListenFailAni : StateMachineBehaviour
 {
     [SerializeField]
@@ -37,3 +38,4 @@ public class ListenFailAni : StateMachineBehaviour
     //    // Implement code that sets up animation IK (inverse kinematics)
     //}
 }
+*/

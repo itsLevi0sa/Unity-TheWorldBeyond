@@ -9,6 +9,7 @@ using Meta.WitAi;
 #if PLATFORM_ANDROID
 using UnityEngine.Android;
 #endif
+/*
 public class WitConnector : MonoBehaviour
 {
     static public WitConnector Instance = null;
@@ -17,7 +18,7 @@ public class WitConnector : MonoBehaviour
     private AppVoiceExperience _voiceExperience;
 
     [SerializeField]
-    private VirtualPet pet;
+    //private VirtualPet pet;
 
     public bool currentFocus { private set; get; } = false;
     public UnityEvent<bool> FocusChangeEvt = new UnityEvent<bool>();
@@ -189,3 +190,4 @@ public class WitConnector : MonoBehaviour
     }
 
 }
+*/

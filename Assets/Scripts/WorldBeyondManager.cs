@@ -8,7 +8,7 @@ using Oculus.Interaction;
 using Oculus.Interaction.DistanceReticles;
 using UnityEngine;
 using UnityEngine.UIElements.Experimental;
-using static MixedRealityManager;
+using static WorldBeyondManager;
 using Random = UnityEngine.Random;
 
 public class WorldBeyondManager : MonoBehaviour

@@ -4,6 +4,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
+/*
 public class VirtualPet : MonoBehaviour
 {
     BallCollectable _ballEatTarget = null;
@@ -762,3 +763,4 @@ public class VirtualPet : MonoBehaviour
     }
     #endregion VoiceCommand
 }
+*/

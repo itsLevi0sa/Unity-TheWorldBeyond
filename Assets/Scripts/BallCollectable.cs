@@ -269,7 +269,7 @@ public class BallCollectable : MonoBehaviour
         ForceVisible();
         Shoot(transform.position, MultiToy.Instance.GetFlashlightDirection());
         MultiToy.Instance.ThrewBall();
-        if (WitConnector.Instance) WitConnector.Instance.WitSwitcher(false);
+        //if (WitConnector.Instance) WitConnector.Instance.WitSwitcher(false);
     }
 
     /// <summary>
@@ -355,6 +355,7 @@ public class BallCollectable : MonoBehaviour
         _sfxBallBounce.SetVolume(impactDot);
         _sfxBallBounce.Play();
 
+        /*
         if (_directOppyShot && collision.collider.gameObject.layer == LayerMask.NameToLayer("Oppy") && intentionalHit)
         {
             if (collision.collider.transform.parent && collision.collider.transform.parent.GetComponent<VirtualPet>())
@@ -362,7 +363,8 @@ public class BallCollectable : MonoBehaviour
                 collision.collider.transform.parent.GetComponent<VirtualPet>().ShotOppy();
             }
         }
-        else if (impactDot > 0.4f && roomObjects == (roomObjects | (1 << collision.collider.gameObject.layer)))
+        */
+        if (impactDot > 0.4f && roomObjects == (roomObjects | (1 << collision.collider.gameObject.layer)))
         {
             GameObject impactFX = Instantiate(_passthroughImpactFXprefab);
             impactFX.transform.position = collision.GetContact(0).point + impactNormal * 0.005f;
