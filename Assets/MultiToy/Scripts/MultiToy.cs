@@ -194,7 +194,7 @@ public class MultiToy : MonoBehaviour
             {
                 if (TriggerPressed())
                 {
-                    if (currentToyIndex == (int)ToyOption.BallGun && WorldBeyondManager.Instance._ballCount > 0)
+                    if (currentToyIndex == (int)ToyOption.BallGun)
                     {
                         _animator.SetTrigger("Shoot");
                     }
@@ -386,11 +386,11 @@ public class MultiToy : MonoBehaviour
         if (!WorldBeyondManager.Instance._usingHands)
         {
             //Ballcount can be 0 when using hands, and you are not able to change to pickup balls at this point when using controllers.
-            if (WorldBeyondManager.Instance._ballCount == 0)
-            {
+           // if (WorldBeyondManager.Instance._ballCount == 0)
+           // {
                 // Give two free balls so that you don't get stuck
-                WorldBeyondManager.Instance._ballCount = 2;
-            }
+            //    WorldBeyondManager.Instance._ballCount = 2;
+           // }
             _unlockToy_1.Play();
             WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.ShootBall);
             _toys[(int)ToyOption.Flashlight].Deactivate();

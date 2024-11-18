@@ -38,28 +38,7 @@ public class WorldBeyondManager : MonoBehaviour
     public Transform _finalUfoRamp;
     [HideInInspector]
     public SpaceshipTrigger _spaceShipAnimator;
-
-    // Energy balls
-    Transform _ballContainer;
-    public GameObject _ballPrefab;
-    BallCollectable _hiddenBallCollectable = null;
-    Vector3 _hiddenBallPosition = Vector3.zero;
-
-    // the little gems spawned when a ball collides
-    List<BallDebris> _ballDebrisObjects;
-    const int _maxBallDebris = 100;
-
-    // How many balls the player currently has
-    [HideInInspector]
-    public int _ballCount = 0;
-    const int _startingBallCount = 0;
-    // How many balls Oppy should eat before heading to the UFO
-    // only starts incrementing during TheGreatBeyond chapter
-    public int _oppyTargetBallCount { private set; get; } = 2;
-    float _ballSpawnTimer = 0.0f;
-    const float _spawnTimeMin = 3.0f;
-    const float _spawnTimeMax = 6.0f;
-    bool _shouldSpawnBall = false;
+   
     public GameObject _worldShockwave;
     public Material[] _environmentMaterials;
 
@@ -137,11 +116,6 @@ public class WorldBeyondManager : MonoBehaviour
         _rightOVR = _rightHand.GetComponent<OVRHand>();
 
         _passthroughLayer.colorMapEditorType = OVRPassthroughLayer.ColorMapEditorType.None;
-
-        GameObject spawnedBalls = new GameObject("SpawnedBalls");
-        _ballContainer = spawnedBalls.transform;
-
-        _ballDebrisObjects = new List<BallDebris>();
 
         _passthroughLayer.textureOpacity = 0;
         _passthroughStylist = this.gameObject.AddComponent<PassthroughStylist>();
@@ -321,44 +295,16 @@ public class WorldBeyondManager : MonoBehaviour
             }
         }
 
-        // make sure there's never a situation with no balls to grab
-        bool noHiddenBall = (_hiddenBallCollectable == null);
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
         bool validMode = (oppyExplores ||  greatBeyond);
 
-        // note: this logic only executes after Oppy enters reality
-        // before that, the experience is scripted, so balls shouldn't spawn so randomly
-        if (flashlightActive && noHiddenBall && _oppyDiscoveryCount >= 2 && validMode)
-        {
-            _ballSpawnTimer -= Time.deltaTime;
-            if (_ballSpawnTimer <= 0.0f)
-            {
-                _shouldSpawnBall = true;
-                _ballSpawnTimer = Random.Range(_spawnTimeMin, _spawnTimeMax);
-            }
-        }
+        //------------------------------------------TRY REMOVING THIS CHUNK--------------------------------------------
+        bool roomSparkleRingVisible = (oppyExplores || greatBeyond || ending);
+        roomSparkleRingVisible |= (searchForOppy);
 
-        if (_shouldSpawnBall)
-        {
-            SpawnHiddenBall();
-            _shouldSpawnBall = false;
-        }
-
-
-        bool roomSparkleRingVisible = (oppyExplores || greatBeyond || ending && _hiddenBallCollectable);
-        roomSparkleRingVisible |= (searchForOppy && ((_hiddenBallCollectable && !_hiddenBallCollectable._wasShot)));
-
-        Vector3 ripplePosition = _hiddenBallCollectable ? _hiddenBallPosition : Vector3.one * -1000.0f;
         float effectSpeed = Time.deltaTime * 2.0f;
         _vrRoomEffectTimer += roomSparkleRingVisible ? effectSpeed : -effectSpeed;
-
-        // to make balls easier to find, display a ripple effect on Passthrough
-        bool showRippleMask = _hiddenBallCollectable != null && flashlightActive && _hiddenBallCollectable._ballState == BallCollectable.BallStatus.Hidden;
-        _vrRoomEffectMaskTimer += showRippleMask ? effectSpeed : -effectSpeed;
-        if (_vrRoomEffectTimer >= 0.0f || _vrRoomEffectMaskTimer >= 0.0f)
-        {
-            VirtualRoom.Instance.SetWallEffectParams(ripplePosition, Mathf.Clamp01(_vrRoomEffectTimer), _vrRoomEffectMaskTimer);
-        }
+        _vrRoomEffectMaskTimer += roomSparkleRingVisible ? effectSpeed : -effectSpeed;
         _vrRoomEffectTimer = Mathf.Clamp01(_vrRoomEffectTimer);
         _vrRoomEffectMaskTimer = Mathf.Clamp01(_vrRoomEffectMaskTimer);
         if (_usingHands)
@@ -443,7 +389,6 @@ public class WorldBeyondManager : MonoBehaviour
         VirtualRoom.Instance.HideEffectMesh();
         _oppyDiscovered = false;
         _oppyDiscoveryCount = 0;
-        _ballCount = _startingBallCount;
         _passthroughStylist.ResetPassthrough(0.1f);
         WorldBeyondEnvironment.Instance._sun.enabled = true;
         StartCoroutine(CountdownToFlashlight(5.0f));
@@ -784,10 +729,6 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     public void DiscoveredBall(BallCollectable collected)
     {
-        if (!_usingHands) // Balls are not absorbed, just picked up when using hands
-        {
-            _ballCount++;
-        }
         WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.BallSearch);
         WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.NoBalls);
 
@@ -815,22 +756,7 @@ public class WorldBeyondManager : MonoBehaviour
     {
         float closestDist = 20.0f;
         BallCollectable closestBall = null;
-        foreach (Transform bcXform in _ballContainer)
-        {
-            BallCollectable bc = bcXform.GetComponent<BallCollectable>();
-            if (!bc)
-            {
-                continue;
-            }
-            float thisDist = Vector3.Distance(petPosition, bc.gameObject.transform.position);
-            if (thisDist < closestDist
-                && bc._ballState == BallCollectable.BallStatus.Released
-                && bc._shotTimer >= 1.0f)
-            {
-                closestDist = thisDist;
-                closestBall = bc;
-            }
-        }
+       
         return closestBall;
     }
 
@@ -842,26 +768,7 @@ public class WorldBeyondManager : MonoBehaviour
         float closestAngle = 0.9f;
 
         BallCollectable closestBall = null;
-        for (int i = 0; i < _ballContainer.childCount; i++)
-        {
-            BallCollectable bc = _ballContainer.GetChild(i).GetComponent<BallCollectable>();
-            if (!bc)
-            {
-                continue;
-            }
-            Vector3 rayFromHand = (bc.gameObject.transform.position - toyPos).normalized;
-            float thisViewAngle = Vector3.Dot(rayFromHand, toyFwd);
-            if (thisViewAngle > closestAngle)
-            {
-                if (bc._ballState == BallCollectable.BallStatus.Available ||
-                    bc._ballState == BallCollectable.BallStatus.Hidden ||
-                    bc._ballState == BallCollectable.BallStatus.Released)
-                {
-                    closestAngle = thisViewAngle;
-                    closestBall = bc;
-                }
-            }
-        }
+        
         return closestBall;
     }
 
@@ -964,13 +871,11 @@ public class WorldBeyondManager : MonoBehaviour
         if (_oppyDiscoveryCount == 1)
         {
             WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.BallSearch);
-            _hiddenBallCollectable.SetState(BallCollectable.BallStatus.Hidden);
+            
         }
         else
         {
-            // spawn ball only after the first discovery (first ball already exists)
-            yield return new WaitForSeconds(Random.Range(_spawnTimeMin, _spawnTimeMax));
-            SpawnHiddenBall();
+
         }
     }
 
@@ -983,10 +888,7 @@ public class WorldBeyondManager : MonoBehaviour
         // if spawning on a wall, track the id:
         // if the wall is toggled off, we need to destroy the ball
         int wallID = -1;
-        GameObject hiddenBall = Instantiate(_ballPrefab);
-        _hiddenBallCollectable = hiddenBall.GetComponent<BallCollectable>();
-        _hiddenBallPosition = GetRandomBallPosition(ref wallID);
-        _hiddenBallCollectable.PlaceHiddenBall(_hiddenBallPosition, wallID);
+        
     }
 
     /// <summary>
@@ -996,16 +898,7 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     public void OpenedWall(int wallID)
     {
-        foreach (Transform child in _ballContainer)
-        {
-            if (child.GetComponent<BallCollectable>())
-            {
-                if (child.GetComponent<BallCollectable>()._wallID == wallID)
-                {
-                    RemoveBallFromWorld(child.GetComponent<BallCollectable>());
-                }
-            }
-        }
+        
 
         if (oppyExplores)
         {
@@ -1373,7 +1266,7 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     public void AddBallToWorld(BallCollectable newBall)
     {
-        newBall.gameObject.transform.parent = _ballContainer;
+ 
     }
 
     /// <summary>
@@ -1381,7 +1274,7 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     public void AddBallDebrisToWorld(GameObject newDebris)
     {
-        _ballDebrisObjects.Add(newDebris.GetComponent<BallDebris>());
+        //_ballDebrisObjects.Add(newDebris.GetComponent<BallDebris>());
     }
 
     /// <summary>
@@ -1389,6 +1282,7 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     public void AffectDebris(Vector3 effectPosition, bool repel)
     {
+        /*
         for (int i = 0; i < _ballDebrisObjects.Count; i++)
         {
             if (_ballDebrisObjects[i] != null)
@@ -1413,6 +1307,7 @@ public class WorldBeyondManager : MonoBehaviour
                 }
             }
         }
+        */
     }
 
     /// <summary>
@@ -1420,6 +1315,7 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     public void DeleteOldDebris()
     {
+        /*
         _ballDebrisObjects.RemoveAll(item => item == null);
         // there's too much debris in the world, start removing some FIFO
         if (_ballDebrisObjects.Count > _maxBallDebris)
@@ -1431,6 +1327,7 @@ public class WorldBeyondManager : MonoBehaviour
                 _ballDebrisObjects[i].Kill();
             }
         }
+        */
     }
 
     /// <summary>
@@ -1446,6 +1343,7 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     void DestroyAllBalls()
     {
+        /*
         foreach (Transform child in _ballContainer)
         {
             if (child != null)
@@ -1465,6 +1363,7 @@ public class WorldBeyondManager : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
+        */
     }
 
     /// <summary>

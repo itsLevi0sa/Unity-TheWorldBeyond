@@ -7,23 +7,26 @@ public class BallShooter : WorldBeyondToy
 {
     public override void ActionDown()
     {
+        /*
         if (WorldBeyondManager.Instance._ballCount > 0)
         {
             ShootBall(transform.forward);
             WorldBeyondManager.Instance._ballCount--;
         }
-        else
-        {
+        */
+       // else
+       // {
             // play "no balls" sound
             if (WorldBeyondManager.Instance.greatBeyond)
             {
                 WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.NoBalls);
             }
-        }
+       // }
     }
 
     public void ShootBall(Vector3 ballDirection)
     {
+        /*
         if (WorldBeyondManager.Instance && WorldBeyondManager.Instance._ballPrefab == null)
         {
             Debug.Log("TheWorldBeyond: no ball prefab found");
@@ -35,5 +38,6 @@ public class BallShooter : WorldBeyondToy
         BallCollectable nbc = newBall.GetComponent<BallCollectable>();
         WorldBeyondManager.Instance.AddBallToWorld(nbc);
         nbc.Shoot(ballPos, ballDirection);
+        */
     }
 }
