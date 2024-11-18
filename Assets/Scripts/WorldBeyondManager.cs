@@ -383,7 +383,7 @@ public class WorldBeyondManager : MonoBehaviour
         _oppyDiscoveryCount = 0;
         _passthroughStylist.ResetPassthrough(0.1f);
         WorldBeyondEnvironment.Instance._sun.enabled = true;
-        StartCoroutine(CountdownToFlashlight(5.0f));
+        StartCoroutine(CountdownToFlashlight(1.0f)); //<-----------------------------COUNTDOWN TO TOY FUNCTIONALITY
         StartCoroutine(FlickerCameraToClearColor());
     }
     void OppyExplores()
@@ -794,8 +794,6 @@ public class WorldBeyondManager : MonoBehaviour
     /// </summary>
     public void OpenedWall(int wallID)
     {
-        
-
         if (oppyExplores)
         {
             WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.None);
@@ -814,55 +812,7 @@ public class WorldBeyondManager : MonoBehaviour
         OVRInput.SetControllerVibration(1, 0, _gameController);
     }
 
-    /// <summary>
-    /// Find a position in the room to place Oppy.
-    /// </summary>
-    public Vector3 GetRandomPetPosition()
-    {
-        Vector3 floorPos = new Vector3(_mainCamera.transform.position.x, GetFloorHeight(), _mainCamera.transform.position.z);
-        Vector3 randomPos = _mainCamera.transform.position - _mainCamera.transform.forward;
-
-        // shoot rays out from player, a few cm above ground
-        Vector3 curbHeight = floorPos + Vector3.up * 0.2f;
-        // startingVec isn't based on -camera.forward because we "sweep" 180 degrees in the loop below
-        Vector3 startingVec = new Vector3(-_mainCamera.transform.right.x, curbHeight.y, -_mainCamera.transform.right.z).normalized;
-
-        // return the farthest position, behind player
-        // however, for each individual raycast, use the closest hit
-        // this avoids a bug where Oppy can spawn outside (from a ray aiming through a wall to another wall or wall edge)
-        float farthestOverallHit = 0.0f;
-        const float castDistance = 100.0f;
-        int sliceCount = 4;
-        for (int i = 0; i <= sliceCount; i++)
-        {
-            RaycastHit hitInfo;
-            LayerMask oppySpawnLayer = LayerMask.GetMask("RoomBox", "Furniture");
-            float closestRaycastHit = castDistance;
-            Vector3 candidatePosition = randomPos;
-            RaycastHit[] roomboxHit = Physics.RaycastAll(curbHeight, startingVec, castDistance, oppySpawnLayer);
-            foreach (RaycastHit hit in roomboxHit)
-            {
-                float thisHit = Vector3.Distance(curbHeight, hit.point);
-                if (thisHit < closestRaycastHit)
-                {
-                    closestRaycastHit = thisHit;
-                    candidatePosition = hit.point - startingVec * 0.5f; // back off from the impact point to give Oppy space
-                }
-            }
-
-            float distanceToHit = Vector3.Distance(curbHeight, candidatePosition);
-            if (distanceToHit > farthestOverallHit)
-            {
-                farthestOverallHit = distanceToHit;
-                randomPos = candidatePosition;
-            }
-
-            startingVec = Quaternion.Euler(0, -180.0f / sliceCount, 0) * startingVec;
-        }
-
-        randomPos = new Vector3(randomPos.x, GetFloorHeight(), randomPos.z);
-        return randomPos;
-    }
+   
 
     /// <summary>
     /// Find a clear space on the floor to place the light beam/Multitoy.
