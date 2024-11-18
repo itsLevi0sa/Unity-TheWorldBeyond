@@ -378,29 +378,6 @@ public class MultiToy : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Activate the ball shooter component of the MultiToy.
-    /// </summary>
-    public void UnlockBallShooter()
-    {
-        if (!WorldBeyondManager.Instance._usingHands)
-        {
-            //Ballcount can be 0 when using hands, and you are not able to change to pickup balls at this point when using controllers.
-           // if (WorldBeyondManager.Instance._ballCount == 0)
-           // {
-                // Give two free balls so that you don't get stuck
-            //    WorldBeyondManager.Instance._ballCount = 2;
-           // }
-            _unlockToy_1.Play();
-            WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.ShootBall);
-            _toys[(int)ToyOption.Flashlight].Deactivate();
-            _toys[(int)ToyOption.BallGun].Activate();
-            _toyIndexController = (int)ToyOption.BallGun;
-            SetToyMesh(ToyOption.BallGun);
-        }
-        _flashlightLoop_1.Stop();
-        _flashlightAbsorbLoop_1.Stop();
-    }
 
     /// <summary>
     /// Activate the wall toggler component of the MultiToy.

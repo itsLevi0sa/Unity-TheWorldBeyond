@@ -298,15 +298,7 @@ public class WorldBeyondManager : MonoBehaviour
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
         bool validMode = (oppyExplores ||  greatBeyond);
 
-        //------------------------------------------TRY REMOVING THIS CHUNK--------------------------------------------
-        bool roomSparkleRingVisible = (oppyExplores || greatBeyond || ending);
-        roomSparkleRingVisible |= (searchForOppy);
 
-        float effectSpeed = Time.deltaTime * 2.0f;
-        _vrRoomEffectTimer += roomSparkleRingVisible ? effectSpeed : -effectSpeed;
-        _vrRoomEffectMaskTimer += roomSparkleRingVisible ? effectSpeed : -effectSpeed;
-        _vrRoomEffectTimer = Mathf.Clamp01(_vrRoomEffectTimer);
-        _vrRoomEffectMaskTimer = Mathf.Clamp01(_vrRoomEffectMaskTimer);
         if (_usingHands)
         {
             HideInvisibleHandAccessories();
@@ -400,7 +392,6 @@ public class WorldBeyondManager : MonoBehaviour
         _passthroughStylist.ResetPassthrough(0.1f);
         VirtualRoom.Instance.ShowAllWalls(true);
         VirtualRoom.Instance.SetRoomSaturation(1.0f);
-        StartCoroutine(UnlockBallShooter(_usingHands ? 0f : 5.0f));
         StartCoroutine(UnlockWallToy(_usingHands ? 5f : 20.0f));
         _spaceShipAnimator.StartIdleSound(); // Start idle sound here - mix will mute it.
     }
@@ -603,21 +594,6 @@ public class WorldBeyondManager : MonoBehaviour
         isInIntroduction = true;  
         ForceChapter(); //ForceChapter(GameChapter.Introduction);#
         Introduction();
-    }
-
-    /// <summary>
-    /// When Oppy first enters reality, prepare to unlock the ball shooter.
-    /// </summary>
-    IEnumerator UnlockBallShooter(float countdown)
-    {
-        yield return new WaitForSeconds(countdown);
-        // ensures the flashlight works again, once it's switched back to
-        MultiToy.Instance.SetFlickerTime(0.0f);
-
-        MultiToy.Instance.UnlockBallShooter();
-        OVRInput.SetControllerVibration(1, 1, _gameController);
-        yield return new WaitForSeconds(1.0f);
-        KillControllerVibration();
     }
 
     /// <summary>
