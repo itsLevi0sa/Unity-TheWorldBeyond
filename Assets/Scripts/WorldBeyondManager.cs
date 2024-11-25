@@ -30,7 +30,6 @@ public class WorldBeyondManager : MonoBehaviour
     [Header("Game Pieces")]
     [HideInInspector]
     public VirtualRoom _vrRoom;
-    public LightBeam _lightBeam;
 
    
     public GameObject _worldShockwave;
@@ -251,7 +250,6 @@ public class WorldBeyondManager : MonoBehaviour
             //MultiToy.Instance.SetToy(i);
             WorldBeyondEnvironment.Instance.ShowEnvironment(mixedRealityMode);
             MultiToy.Instance.SetToy();
-            if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
             //----------------MixedReality mode part---------------------------------------------------
             MixedRealityMode();         
         }
