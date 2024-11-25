@@ -269,50 +269,8 @@ public class WorldBeyondManager : MonoBehaviour
             isInTitle = false;
             searchForOppy = true;
             ForceChapter();// ForceChapter(GameChapter.SearchForOppy);
-            SearchForOppy();
-            //Invoke(" ForceChapter", 1f); 
-            //Invoke("SearchForOppy",1.1f);
+            SearchForOppy();         
         }
-        /*
-        else if (isInIntroduction)
-        {
-            // Passthrough fading is done in the PlayIntroPassthrough coroutine
-        }
-        else if (oppyBaitsYou)
-        {
-            // if either hand is getting close to the toy, grab it and start the experience
-            float handRange = 0.2f;
-            float leftRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch), MultiToy.Instance.transform.position);
-            float rightRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch), MultiToy.Instance.transform.position);
-            bool leftHandApproaching = leftRange <= handRange;
-            bool rightHandApproaching = rightRange <= handRange;
-
-            MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
-            /*
-            if (MultiToy.Instance._toyVisible && (leftHandApproaching || rightHandApproaching))
-            {
-                if (usingHands)
-                {
-                    _gameController = leftRange < rightRange ? OVRInput.Controller.LHand : OVRInput.Controller.RHand;
-                    MultiToy.Instance.SetToyMesh(MultiToy.ToyOption.None);
-                }
-                else
-                {
-                    _gameController = leftRange < rightRange ? OVRInput.Controller.LTouch : OVRInput.Controller.RTouch;
-                    MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
-                }
-                _usingHands = usingHands;
-
-                _lightBeam.CloseBeam();
-                MultiToy.Instance._grabToy_1.Play();
-            
-            oppyBaitsYou = false;
-            searchForOppy = true;
-            ForceChapter(); // ForceChapter(GameChapter.SearchForOppy);
-            SearchForOppy();
-        }
-    */
-        
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
         bool validMode = (oppyExplores ||  greatBeyond);
 
@@ -367,28 +325,6 @@ public class WorldBeyondManager : MonoBehaviour
             if (holdingBall) grabbedBall.ForceVisible();
         }
     }
-
-    void Void()
-    {
-
-    }
-    void Title()
-    {
-        AudioManager.SetSnapshot_Title();
-        MusicManager.Instance.PlayMusic(MusicManager.Instance.IntroMusic);
-        StartCoroutine(ShowTitleScreen());
-        VirtualRoom.Instance.ShowAllWalls(false);
-        VirtualRoom.Instance.HideEffectMesh();
-        WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.None);
-        WorldBeyondEnvironment.Instance._sun.enabled = false;
-    }
-    void Introduction()
-    {
-        AudioManager.SetSnapshot_Introduction();
-        VirtualRoom.Instance.ShowDarkRoom(true);
-        VirtualRoom.Instance.AnimateEffectMesh();
-        StartCoroutine(PlayIntroPassthrough());
-    }
     void OppyBaitsYou()
     {
         _passthroughStylist.ResetPassthrough(0.1f);
@@ -407,7 +343,6 @@ public class WorldBeyondManager : MonoBehaviour
         StartCoroutine(FlickerCameraToClearColor());//<-----------------------------THIS ACTUALLY MAKES THE PASSTHROUGH WORK!!!!!!!
     }
   
-
     public void ForceChapter()
     {
         StopAllCoroutines();
@@ -443,69 +378,7 @@ public class WorldBeyondManager : MonoBehaviour
         if (_endScreen) _endScreen.SetActive(false);
     }
 
-    /// <summary>
-    /// After the title screen fades to black, start the transition from black to darkened-Passthrough.
-    /// After that, trigger the next chapter that shows the light beam.
-    /// </summary>
-    IEnumerator PlayIntroPassthrough()
-    {
-        _backgroundFadeSphere.SetActive(false);
-        // first, make everything black
-        PassthroughStylist.PassthroughStyle darkPassthroughStyle = new PassthroughStylist.PassthroughStyle(
-            new Color(0, 0, 0, 0),
-            1.0f,
-            0.0f,
-            0.0f,
-            0.0f,
-            true,
-            Color.black,
-            Color.black,
-            Color.black);
-        _passthroughStylist.ForcePassthroughStyle(darkPassthroughStyle);
-
-        // fade in edges
-        float timer = 0.0f;
-        float lerpTime = 4.0f;
-        while (timer <= lerpTime)
-        {
-            timer += Time.deltaTime;
-
-            Color edgeColor = Color.white;
-            edgeColor.a = Mathf.Clamp01(timer / 3.0f); // fade from transparent
-            _passthroughLayer.edgeColor = edgeColor;
-
-            float normTime = Mathf.Clamp01(timer / lerpTime);
-            _fadeSphere.sharedMaterial.SetColor("_Color", Color.Lerp(Color.black, Color.clear, normTime));
-
-            VirtualRoom.Instance.SetEdgeEffectIntensity(normTime);
-
-            // once lerpTime is over, fade in normal passthrough
-            if (timer >= lerpTime)
-            {
-                PassthroughStylist.PassthroughStyle normalPassthrough = new PassthroughStylist.PassthroughStyle(
-                    new Color(0, 0, 0, 0),
-                    1.0f,
-                    0.0f,
-                    0.0f,
-                    0.0f,
-                    false,
-                    Color.white,
-                    Color.black,
-                    Color.white);
-                _passthroughStylist.ShowStylizedPassthrough(normalPassthrough, 5.0f);
-                _fadeSphere.gameObject.SetActive(false);
-            }
-            yield return null;
-        }
-
-        yield return new WaitForSeconds(3.0f);
-
-        isInIntroduction = false;
-        oppyBaitsYou = true;       
-        ForceChapter(); //ForceChapter(GameChapter.OppyBaitsYou);
-        OppyBaitsYou();
-    }
-
+   
     /// <summary>
     /// When you first grab the MultiToy, the world flashes for a split second.
     /// </summary>
@@ -527,61 +400,6 @@ public class WorldBeyondManager : MonoBehaviour
             }
             yield return null;
         }
-    }
-
-    /// <summary>
-    /// Handle black fading, Passthrough blending, and the intro title screen animation.
-    /// </summary>
-    IEnumerator ShowTitleScreen()
-    {
-        _fadeSphere.gameObject.SetActive(true);
-        _backgroundFadeSphere.gameObject.SetActive(true);
-
-        PassthroughStylist.PassthroughStyle darkPassthroughStyle = new PassthroughStylist.PassthroughStyle(
-               new Color(0, 0, 0, 0),
-               1.0f,
-               0.0f,
-               0.0f,
-               0.0f,
-               true,
-               Color.black,
-               Color.black,
-               Color.black);
-        _passthroughStylist.ForcePassthroughStyle(darkPassthroughStyle);
-
-        _fadeSphere.sharedMaterial.SetColor("_Color", Color.black);
-        _fadeSphere.sharedMaterial.renderQueue = 4999;
-
-        _backgroundFadeSphere.GetComponent<MeshRenderer>().material.renderQueue = 1997;
-        _backgroundFadeSphere.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.black);
-
-        _titleScreen.SetActive(true);
-        PositionTitleScreens(true);
-
-        // fade/animate title text
-        float timer = 0.0f;
-        float lerpTime = 8.0f;
-        while (timer <= lerpTime)
-        {
-            timer += Time.deltaTime;
-
-            float normTimer = Mathf.Clamp01(timer / lerpTime);
-
-            // fade black above everything
-            float blackFade = Mathf.Clamp01(normTimer * 5) * Mathf.Clamp01((1 - normTimer) * 5);
-            _fadeSphere.sharedMaterial.SetColor("_Color", Color.Lerp(Color.black, Color.clear, blackFade));
-
-            // once lerpTime is over, fade in normal passthrough
-            if (timer >= lerpTime)
-            {
-                _titleScreen.SetActive(false);
-            }
-            yield return null;
-        }
-        isInTitle = false;
-        isInIntroduction = true;  
-        ForceChapter(); //ForceChapter(GameChapter.Introduction);#
-        Introduction();
     }
 
     /// <summary>
@@ -843,7 +661,7 @@ public class WorldBeyondManager : MonoBehaviour
             ending = false;
             isInTitle = true;
             ForceChapter(); // ForceChapter(GameChapter.Title);
-            Title();
+
         }
     }
 
