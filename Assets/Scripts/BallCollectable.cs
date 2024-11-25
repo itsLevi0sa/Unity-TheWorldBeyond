@@ -217,9 +217,9 @@ public class BallCollectable : MonoBehaviour
         _rigidBody.AddTorque(randomTorque * 20);
         MultiToy.Instance._ballShoot_1.Play();
         WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.ShootBall);
-        bool canChaseBall = WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
+        //bool canChaseBall = WorldBeyondManager.Instance.oppyExplores || WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
         GetComponent<AudioSource>().Stop();
-        _ballAdvancesStory = WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
+        //_ballAdvancesStory = WorldBeyondManager.Instance.greatBeyond || WorldBeyondManager.Instance.ending;
         _wasShot = true;
     }
 

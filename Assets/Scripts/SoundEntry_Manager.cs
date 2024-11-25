@@ -54,18 +54,7 @@ public class SoundEntry_Manager : MonoBehaviour
     // Update is called once per frame
     public void DoLateUpdate()
     {
-        if (WorldBeyondManager.Instance.oppyExplores)
-        {
-            HandleObstructed();
-        }
-        if (WorldBeyondManager.Instance.greatBeyond)
-        {
-            HandleObstructed();
-        }
-        if (WorldBeyondManager.Instance.ending)
-        {
-            HandleObstructed();
-        }
+    
     }
 
     #region OBSTRUCTION_MANAGER

@@ -85,7 +85,7 @@ public class RoomFramer : WorldBeyondToy
 
             if (!surfacePassthroughActive)
             {
-                WorldBeyondManager.Instance.OpenedWall(surfaceId);
+                //WorldBeyondManager.Instance.OpenedWall(surfaceId);
                 WorldBeyondTutorial.Instance.HideMessage(WorldBeyondTutorial.TutorialMessage.ShootWall);
             }
 

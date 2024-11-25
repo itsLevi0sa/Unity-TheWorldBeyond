@@ -34,10 +34,7 @@ public class WorldBeyondManager : MonoBehaviour
     public VirtualRoom _vrRoom;
     public LightBeam _lightBeam;
     Vector3 _toyBasePosition = Vector3.zero;
-    public Transform _finalUfoTarget;
-    public Transform _finalUfoRamp;
-    [HideInInspector]
-    public SpaceshipTrigger _spaceShipAnimator;
+
    
     public GameObject _worldShockwave;
     public Material[] _environmentMaterials;
@@ -46,10 +43,7 @@ public class WorldBeyondManager : MonoBehaviour
     public Camera _mainCamera;
     public MeshRenderer _fadeSphere;
     GameObject _backgroundFadeSphere;
-    public GameObject _titleScreenPrefab;
-    public GameObject _endScreenPrefab;
-    GameObject _titleScreen;
-    GameObject _endScreen;
+
     float _vrRoomEffectTimer = 0.0f;
     float _vrRoomEffectMaskTimer = 0.0f;
     float _titleFadeTimer = 0.0f;
@@ -86,13 +80,9 @@ public class WorldBeyondManager : MonoBehaviour
     private float _rightHandGrabbedBallLastDistance = Mathf.Infinity;
 
     public bool isInVoid = false;
-    public bool isInTitle = false;
-    public bool isInIntroduction = false;
     public bool oppyBaitsYou = false;
     public bool searchForOppy = false;
-    public bool oppyExplores = false;
-    public bool greatBeyond = false;
-    public bool ending = false;
+
 
     private void Awake()
     {
@@ -131,15 +121,6 @@ public class WorldBeyondManager : MonoBehaviour
             Color.black,
             Color.black);
         _passthroughStylist.ForcePassthroughStyle(darkPassthroughStyle);
-
-        _spaceShipAnimator = _finalUfoTarget.GetComponent<SpaceshipTrigger>();
-
-        _titleScreen = Instantiate(_titleScreenPrefab);
-        _titleScreen.SetActive(false);
-        _endScreen = Instantiate(_endScreenPrefab);
-        // end screen needs to render above the black fade sphere, which is 4999
-        _endScreen.GetComponent<MeshRenderer>().sharedMaterial.renderQueue = 5000;
-        _endScreen.SetActive(false);
     }
 
     public void Start()
@@ -265,14 +246,12 @@ public class WorldBeyondManager : MonoBehaviour
 
             MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
             oppyBaitsYou = false;
-            isInIntroduction = false;
-            isInTitle = false;
+          
             searchForOppy = true;
             ForceChapter();// ForceChapter(GameChapter.SearchForOppy);
             SearchForOppy();         
         }
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
-        bool validMode = (oppyExplores ||  greatBeyond);
 
 
         if (_usingHands)
@@ -348,22 +327,17 @@ public class WorldBeyondManager : MonoBehaviour
         StopAllCoroutines();
         KillControllerVibration();
         //MultiToy.Instance.SetToy(i);
-        WorldBeyondEnvironment.Instance.ShowEnvironment(oppyExplores || greatBeyond || ending);
+        WorldBeyondEnvironment.Instance.ShowEnvironment(searchForOppy);
 
-        if (isInVoid || isInTitle || isInIntroduction || oppyBaitsYou) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
+        if (isInVoid || oppyBaitsYou) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
 
        // _pet.gameObject.SetActive(oppyExplores || greatBeyond || ending); //(int)_currentChapter >= (int)GameChapter.OppyExploresReality
         int i = 0;
         if (isInVoid)
         {
             i = 0;
-        }else if(isInTitle)
-        {
-            i = 1;
-        }else if( isInIntroduction)
-        {
-            i = 2;
-        }else if (oppyBaitsYou)
+        }
+        else if (oppyBaitsYou)
         {
             i = 3;
         }else if (searchForOppy)
@@ -374,8 +348,6 @@ public class WorldBeyondManager : MonoBehaviour
         MultiToy.Instance.SetToy(i);
 
         if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
-        if (_titleScreen) _titleScreen.SetActive(false);
-        if (_endScreen) _endScreen.SetActive(false);
     }
 
    
@@ -507,21 +479,6 @@ public class WorldBeyondManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Any time the player "opens" a wall with the wall toggler, some special behavior needs to happen:
-    /// 1. Any "hidden" ball on that wall needs to be destroyed, otherwise there'd be a weird float passthrough ball.
-    /// 2. If it's the first time, advance the story.
-    /// </summary>
-    public void OpenedWall(int wallID)
-    {
-        if (oppyExplores)
-        {
-            WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.None);
-            oppyExplores = false;
-            greatBeyond = true;   
-            ForceChapter(); //ForceChapter(GameChapter.TheGreatBeyond);
-        }
-    }
 
     /// <summary>
     /// Self-explanatory.
@@ -616,87 +573,6 @@ public class WorldBeyondManager : MonoBehaviour
         return point;
     }
 
-    /// <summary>
-    /// Start the coroutine that plays the UFO exit sequence.
-    /// </summary>
-    public void FlyAwayUFO()
-    {
-        StartCoroutine(DoEndingSequence());
-    }
-
-    /// <summary>
-    /// End game sequence and cleanup: fade to black, trigger the UFO animation, reset the game.
-    /// </summary>
-    IEnumerator DoEndingSequence()
-    {
-        AudioManager.SetSnapshot_Ending();
-        _fadeSphere.gameObject.SetActive(true);
-        _fadeSphere.sharedMaterial.SetColor("_Color", Color.clear);
-        if (_spaceShipAnimator)
-        {
-            _spaceShipAnimator.TriggerAnim();
-            float flyingAwayTime = 15.5f;
-            float timer = 0.0f;
-            while (timer < flyingAwayTime)
-            {
-                timer += Time.deltaTime;
-                float fadeValue = timer / flyingAwayTime;
-                fadeValue = Mathf.Clamp01((fadeValue - 0.9f) * 10.0f);
-                _fadeSphere.sharedMaterial.SetColor("_Color", Color.Lerp(Color.clear, Color.white, fadeValue));
-                WorldBeyondEnvironment.Instance.FadeOutdoorAudio(1 - fadeValue);
-                if (timer >= flyingAwayTime)
-                {
-                    WorldBeyondEnvironment.Instance.SetOutdoorAudioParams(Vector3.zero, false);
-                    _endScreen.SetActive(true);
-                    PositionTitleScreens(true);
-                    _fadeSphere.sharedMaterial.SetColor("_Color", Color.white);
-                    MultiToy.Instance.EndGame();
-                    _spaceShipAnimator.ResetAnim();
-                }
-                yield return null;
-            }
-
-            AudioManager.SetSnapshot_Reset();
-            yield return new WaitForSeconds(13.0f);
-            ending = false;
-            isInTitle = true;
-            ForceChapter(); // ForceChapter(GameChapter.Title);
-
-        }
-    }
-
-    /// <summary>
-    /// Dolly/rotate the title and end screens
-    /// </summary>
-    void PositionTitleScreens(bool firstFrame)
-    {
-        _titleFadeTimer += Time.deltaTime;
-        if (firstFrame)
-        {
-            _titleFadeTimer = 0.0f;
-        }
-
-        Vector3 camFwd = new Vector3(_mainCamera.transform.forward.x, 0, _mainCamera.transform.forward.z).normalized;
-        Vector3 currentLook = (_titleScreen.transform.position - _mainCamera.transform.position).normalized;
-        const float posLerp = 0.95f;
-        Vector3 targetLook = firstFrame ? camFwd : Vector3.Slerp(camFwd, currentLook, posLerp);
-        Vector3 pitch = Vector3.Lerp(Vector3.down * 0.05f, Vector3.up * 0.05f, Mathf.Clamp01(_titleFadeTimer / 8.0f));
-        Quaternion targetRotation = Quaternion.LookRotation(-targetLook + pitch, Vector3.up);
-
-        float dollyDirection = isInTitle ? -1.0f : 1.0f;
-        float textDistance = (isInTitle ? 5 : 4) + (dollyDirection * _titleFadeTimer * 0.1f);
-
-        _titleScreen.transform.position = _mainCamera.transform.position + targetLook * textDistance;
-        _titleScreen.transform.rotation = targetRotation;
-
-        _endScreen.transform.position = _titleScreen.transform.position;
-        _endScreen.transform.rotation = _titleScreen.transform.rotation;
-
-        // hardcoded according to the fade out time of 13 seconds
-        // fade in for 2 seconds, fade out after 8 seconds
-        float endFade = Mathf.Clamp01(_titleFadeTimer * 0.5f) * (1.0f - Mathf.Clamp01((_titleFadeTimer - 8) * 0.25f));
-        _endScreen.GetComponent<MeshRenderer>().sharedMaterial.SetColor("_Color", Color.Lerp(Color.black, Color.white, endFade));
-    }
 
     /// <summary>
     /// Adjust the desaturation range of the environment shaders.

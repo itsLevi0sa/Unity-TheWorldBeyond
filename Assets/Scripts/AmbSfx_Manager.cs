@@ -67,20 +67,7 @@ public class AmbSfx_Manager : MonoBehaviour
     // Update is called once per frame
     public void DoLateUpdate()
     {
-        if (!_isPlaying)
-        {
-            if (WorldBeyondManager.Instance.greatBeyond)
-            {
-                SetEnabled(true);
-            }
-        }
-        else
-        {
-            if (WorldBeyondManager.Instance.isInTitle)
-            {
-                SetEnabled(false);
-            }
-        }
+
         // If the lister is blocked by a wall stop the emitter.
         HandleObstructed();
     }

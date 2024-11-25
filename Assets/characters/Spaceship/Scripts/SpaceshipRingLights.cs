@@ -128,10 +128,6 @@ public class SpaceshipRingLights : MonoBehaviour
 
     private void Update()
     {
-        if (WorldBeyondManager.Instance.ending)
-        {
-            return;
-        }
 
         // on mode change
         if (m_prevMode != Mode)
