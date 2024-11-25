@@ -271,15 +271,14 @@ public class WorldBeyondManager : MonoBehaviour
     {
         bool leftHandHidden = !_leftHand.IsDataValid || _leftHandVisual.ForceOffVisibility;
         bool rightHandHidden = !_rightHand.IsDataValid || _rightHandVisual.ForceOffVisibility;
-        var grabbedBall = MultiToy.Instance._grabbedBall;
 
         // Called before updating distance so that the hidden property is set while the ball is close to the hand
-        UpdateHandVisibility(leftHandHidden, _interactionLineLeft, _leftHandGrabbedBallLastDistance, _gameController == OVRInput.Controller.LHand, grabbedBall);
-        UpdateHandVisibility(rightHandHidden, _interactionLineRight, _rightHandGrabbedBallLastDistance, _gameController == OVRInput.Controller.RHand, grabbedBall);
+        UpdateHandVisibility(leftHandHidden, _interactionLineLeft, _leftHandGrabbedBallLastDistance, _gameController == OVRInput.Controller.LHand);
+        UpdateHandVisibility(rightHandHidden, _interactionLineRight, _rightHandGrabbedBallLastDistance, _gameController == OVRInput.Controller.RHand);
 
         // Hidden hands have a position of 0, only update if the hand is visible.
-        if (!leftHandHidden) _leftHandGrabbedBallLastDistance = grabbedBall ? Vector3.Distance(_leftHandAnchor.position, grabbedBall.transform.position) : Mathf.Infinity;
-        if (!rightHandHidden) _rightHandGrabbedBallLastDistance = grabbedBall ? Vector3.Distance(_rightHandAnchor.position, grabbedBall.transform.position) : Mathf.Infinity;
+        if (!leftHandHidden) _leftHandGrabbedBallLastDistance = Mathf.Infinity;
+        if (!rightHandHidden) _rightHandGrabbedBallLastDistance = Mathf.Infinity;
 
         if (!_usingHands)
         {
@@ -292,20 +291,17 @@ public class WorldBeyondManager : MonoBehaviour
     /// Hides the ball, reticule and tutorial if the hand is not tracked anymore.
     /// Using previousHandToBallDistance to determine whether the current hand is holding the ball
     /// </summary>
-    private void UpdateHandVisibility(bool handHidden, DistantInteractionLineVisual interactionLine, float previousHandToBallDistance, bool primary, [CanBeNull] BallCollectable grabbedBall)
+    private void UpdateHandVisibility(bool handHidden, DistantInteractionLineVisual interactionLine, float previousHandToBallDistance, bool primary)
     {
-        bool holdingBall = grabbedBall != null && previousHandToBallDistance < 0.2f;
         if (handHidden)
         {
             interactionLine.gameObject.SetActive(false);
             if (primary) WorldBeyondTutorial.Instance.ForceInvisible();
-            if (holdingBall) grabbedBall.ForceInvisible();
         }
         else
         {
             interactionLine.gameObject.SetActive(_usingHands && MultiToy.Instance.GetCurrentToy() == MultiToy.ToyOption.Flashlight);
             if (primary) WorldBeyondTutorial.Instance.ForceVisible();
-            if (holdingBall) grabbedBall.ForceVisible();
         }
     }
     void PrepareMixedReality()

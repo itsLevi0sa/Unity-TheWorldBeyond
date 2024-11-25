@@ -63,8 +63,6 @@ public class MultiToy : MonoBehaviour
 
     // only used by hands
     [HideInInspector]
-    public BallCollectable _grabbedBall = null;
-    bool _throwBallTaught = false;
     public MeshRenderer _handGlove;
 
     private void Start()
@@ -159,14 +157,14 @@ public class MultiToy : MonoBehaviour
                 // palm out: flashlight
                 float palmOut = Vector3.Dot(mainCam.forward, controllerRot * Vector3.forward);
                 float fistStrength = Mathf.Clamp01((WorldBeyondManager.Instance._fistValue - 0.3f) * 5.0f);
-                float flashL = Mathf.Clamp01(palmOut * 10) * (1 - fistStrength) * (_grabbedBall ? 0 : 1);
+                float flashL = Mathf.Clamp01(palmOut * 10) * (1 - fistStrength);
 
                 currentToyIndex = (flashL > 0.5f && _flashLightUnlocked) ? (int)ToyOption.Flashlight : currentToyIndex;
                 _toyFlashlight.SetLightStrength(flashL * _flickerFlashlightStrength * Mathf.Clamp01(_ballTossCooldownFactor - 1));
 
                 // palm up: prepare room framer
                 float palmUp = Vector3.Dot(mainCam.right, controllerRot * Vector3.right);
-                currentToyIndex = (palmUp < 0.0f && _wallToyUnlocked && !_grabbedBall) ? (int)ToyOption.WallToy : currentToyIndex;
+                currentToyIndex = (palmUp < 0.0f && _wallToyUnlocked) ? (int)ToyOption.WallToy : currentToyIndex;
 
                 if (lastToy != currentToyIndex)
                 {
