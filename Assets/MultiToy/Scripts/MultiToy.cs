@@ -114,7 +114,7 @@ public class MultiToy : MonoBehaviour
         Quaternion controllerRot = Quaternion.identity;
         WorldBeyondManager.Instance.GetDominantHand(ref controllerPos, ref controllerRot);
 
-        if (WorldBeyondManager.Instance.oppyBaitsYou==false)
+        if (WorldBeyondManager.Instance.enterMixedReality == false)
         {
             transform.position = controllerPos;
             transform.rotation = controllerRot;

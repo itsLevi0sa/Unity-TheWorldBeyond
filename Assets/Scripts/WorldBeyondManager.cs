@@ -74,7 +74,7 @@ public class WorldBeyondManager : MonoBehaviour
     private float _rightHandGrabbedBallLastDistance = Mathf.Infinity;
 
     public bool isInVoid = false;
-    public bool oppyBaitsYou = false;
+    public bool enterMixedReality = false;
     public bool searchForOppy = false;
 
 
@@ -213,7 +213,7 @@ public class WorldBeyondManager : MonoBehaviour
         if (isInVoid)
         {
             if (_sceneModelLoaded) GetRoomFromScene();
-        }else if (oppyBaitsYou)
+        }else if (enterMixedReality)
         {
             //PositionTitleScreens(false);
 
@@ -239,7 +239,7 @@ public class WorldBeyondManager : MonoBehaviour
             bool rightHandApproaching = rightRange <= handRange;
 
             MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
-            oppyBaitsYou = false;
+            enterMixedReality = false;
           
             searchForOppy = true;
             ForceChapter();// ForceChapter(GameChapter.SearchForOppy);
@@ -298,7 +298,7 @@ public class WorldBeyondManager : MonoBehaviour
             if (holdingBall) grabbedBall.ForceVisible();
         }
     }
-    void OppyBaitsYou()
+    void EnterMixedReality()
     {
         _passthroughStylist.ResetPassthrough(0.1f);
         StartCoroutine(PlaceToyRandomly(2.0f));
@@ -321,7 +321,7 @@ public class WorldBeyondManager : MonoBehaviour
         //MultiToy.Instance.SetToy(i);
         WorldBeyondEnvironment.Instance.ShowEnvironment(searchForOppy);
 
-        if (isInVoid || oppyBaitsYou) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
+        if (isInVoid || enterMixedReality) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
 
        // _pet.gameObject.SetActive(oppyExplores || greatBeyond || ending); //(int)_currentChapter >= (int)GameChapter.OppyExploresReality
         int i = 0;
@@ -329,7 +329,7 @@ public class WorldBeyondManager : MonoBehaviour
         {
             i = 0;
         }
-        else if (oppyBaitsYou)
+        else if (enterMixedReality)
         {
             i = 3;
         }else if (searchForOppy)
@@ -456,9 +456,9 @@ public class WorldBeyondManager : MonoBehaviour
             WorldBeyondEnvironment.Instance.Initialize();
             isInVoid = false;
             // isInTitle = true;
-            oppyBaitsYou = true;
+            enterMixedReality = true;
             ForceChapter(); //ForceChapter(GameChapter.Title);
-            OppyBaitsYou();
+            EnterMixedReality();
         }
         catch
         {
