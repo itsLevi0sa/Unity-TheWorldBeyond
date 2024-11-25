@@ -331,6 +331,11 @@ public class MultiToy : MonoBehaviour
                 _toyFlashlight.SetLightStrength(WorldBeyondManager.Instance._usingHands ? 0.0f : 1.0f);
                 break;
             case 4: // WorldBeyondManager.GameChapter.SearchForOppy:
+                _toyIndexController = (int)ToyOption.Flashlight;
+                _toyIndexHand = (int)ToyOption.None;
+                _flashLightUnlocked = false;
+                _toyFlashlight.SetLightStrength(WorldBeyondManager.Instance._usingHands ? 0.0f : 1.0f);
+
                 ShowToy(true);
                 _canSwitchToys = false;
                 break;

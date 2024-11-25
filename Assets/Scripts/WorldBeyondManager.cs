@@ -238,10 +238,43 @@ public class WorldBeyondManager : MonoBehaviour
         if (isInVoid)
         {
             if (_sceneModelLoaded) GetRoomFromScene();
-        }else if (isInTitle)
+        }else if (oppyBaitsYou)
         {
-            PositionTitleScreens(false);
-        }else if (isInIntroduction)
+            //PositionTitleScreens(false);
+
+            _backgroundFadeSphere.SetActive(false);
+            PassthroughStylist.PassthroughStyle normalPassthrough = new PassthroughStylist.PassthroughStyle(
+                   new Color(0, 0, 0, 0),
+                   1.0f,
+                   0.0f,
+                   0.0f,
+                   0.0f,
+                   false,
+                   Color.white,
+                   Color.black,
+                   Color.white);
+            _passthroughStylist.ShowStylizedPassthrough(normalPassthrough, 5.0f);
+            _fadeSphere.gameObject.SetActive(false);
+
+            // if either hand is getting close to the toy, grab it and start the experience
+            float handRange = 0.2f;
+            float leftRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.LTouch), MultiToy.Instance.transform.position);
+            float rightRange = Vector3.Distance(OVRInput.GetLocalControllerPosition(OVRInput.Controller.RTouch), MultiToy.Instance.transform.position);
+            bool leftHandApproaching = leftRange <= handRange;
+            bool rightHandApproaching = rightRange <= handRange;
+
+            MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
+            oppyBaitsYou = false;
+            isInIntroduction = false;
+            isInTitle = false;
+            searchForOppy = true;
+            ForceChapter();// ForceChapter(GameChapter.SearchForOppy);
+            SearchForOppy();
+            //Invoke(" ForceChapter", 1f); 
+            //Invoke("SearchForOppy",1.1f);
+        }
+        /*
+        else if (isInIntroduction)
         {
             // Passthrough fading is done in the PlayIntroPassthrough coroutine
         }
@@ -272,12 +305,13 @@ public class WorldBeyondManager : MonoBehaviour
 
                 _lightBeam.CloseBeam();
                 MultiToy.Instance._grabToy_1.Play();
-            */
+            
             oppyBaitsYou = false;
             searchForOppy = true;
             ForceChapter(); // ForceChapter(GameChapter.SearchForOppy);
             SearchForOppy();
         }
+    */
         
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
         bool validMode = (oppyExplores ||  greatBeyond);
@@ -643,9 +677,10 @@ public class WorldBeyondManager : MonoBehaviour
             }
             WorldBeyondEnvironment.Instance.Initialize();
             isInVoid = false;
-            isInTitle = true;
+            // isInTitle = true;
+            oppyBaitsYou = true;
             ForceChapter(); //ForceChapter(GameChapter.Title);
-            Title();
+            OppyBaitsYou();
         }
         catch
         {
