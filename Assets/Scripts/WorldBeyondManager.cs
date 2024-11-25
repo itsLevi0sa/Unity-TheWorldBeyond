@@ -28,12 +28,9 @@ public class WorldBeyondManager : MonoBehaviour
     public OVRSceneAnchor[] _sceneAnchors;
 
     [Header("Game Pieces")]
-    int _oppyDiscoveryCount = 0;
     [HideInInspector]
-    public bool _oppyDiscovered = false;
     public VirtualRoom _vrRoom;
     public LightBeam _lightBeam;
-    Vector3 _toyBasePosition = Vector3.zero;
 
    
     public GameObject _worldShockwave;
@@ -44,9 +41,6 @@ public class WorldBeyondManager : MonoBehaviour
     public MeshRenderer _fadeSphere;
     GameObject _backgroundFadeSphere;
 
-    float _vrRoomEffectTimer = 0.0f;
-    float _vrRoomEffectMaskTimer = 0.0f;
-    float _titleFadeTimer = 0.0f;
     PassthroughStylist _passthroughStylist;
     Color _cameraDark = new Color(0, 0, 0, 0.75f);
 
@@ -312,8 +306,6 @@ public class WorldBeyondManager : MonoBehaviour
     void SearchForOppy()
     {
         VirtualRoom.Instance.HideEffectMesh();
-        _oppyDiscovered = false;
-        _oppyDiscoveryCount = 0;
         _passthroughStylist.ResetPassthrough(0.1f);
         WorldBeyondEnvironment.Instance._sun.enabled = true;
 
