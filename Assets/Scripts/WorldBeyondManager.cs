@@ -31,8 +31,6 @@ public class WorldBeyondManager : MonoBehaviour
     [HideInInspector]
     public VirtualRoom _vrRoom;
 
-   
-    public GameObject _worldShockwave;
     public Material[] _environmentMaterials;
 
     [Header("Overlays")]
