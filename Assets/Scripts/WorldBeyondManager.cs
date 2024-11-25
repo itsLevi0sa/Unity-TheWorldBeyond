@@ -244,7 +244,15 @@ public class WorldBeyondManager : MonoBehaviour
             prepareForMixedReality = false;
 
             mixedRealityMode = true;
-            ForceChapter();// ForceChapter(GameChapter.SearchForOppy);
+            // ForceChapter();// ForceChapter(GameChapter.SearchForOppy);
+            //--------------------------------------Force Chapter part------------------------------------
+            StopAllCoroutines();
+            KillControllerVibration();
+            //MultiToy.Instance.SetToy(i);
+            WorldBeyondEnvironment.Instance.ShowEnvironment(mixedRealityMode);
+            MultiToy.Instance.SetToy(4);
+            if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
+            //----------------MixedReality mode part---------------------------------------------------
             MixedRealityMode();         
         }
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
@@ -315,18 +323,6 @@ public class WorldBeyondManager : MonoBehaviour
         StartCoroutine(CountdownToFlashlight(0.1f)); //<-----------------------------COUNTDOWN TO TOY FUNCTIONALITY
         StartCoroutine(FlickerCameraToClearColor());//<-----------------------------THIS ACTUALLY MAKES THE PASSTHROUGH WORK!!!!!!!
     }
-  
-    public void ForceChapter()
-    {
-        StopAllCoroutines();
-        KillControllerVibration();
-        //MultiToy.Instance.SetToy(i);
-        WorldBeyondEnvironment.Instance.ShowEnvironment(mixedRealityMode);
-        MultiToy.Instance.SetToy(4);
-
-        if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
-    }
-
    
     /// <summary>
     /// When you first grab the MultiToy, the world flashes for a split second.
