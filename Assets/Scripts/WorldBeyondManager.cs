@@ -394,10 +394,6 @@ public class WorldBeyondManager : MonoBehaviour
         yield return new WaitForSeconds(spawnTime);
         MultiToy.Instance.ShowToy(true);
         MultiToy.Instance.SetToyMesh(MultiToy.ToyOption.Flashlight);
-        _toyBasePosition = GetRandomToyPosition();
-        _lightBeam.gameObject.SetActive(true);
-        _lightBeam.transform.localScale = new Vector3(1, VirtualRoom.Instance.GetCeilingHeight(), 1);
-        _lightBeam.Prepare(_toyBasePosition);
     }
 
     /// <summary>
@@ -487,92 +483,6 @@ public class WorldBeyondManager : MonoBehaviour
     {
         OVRInput.SetControllerVibration(1, 0, _gameController);
     }
-
-   
-
-    /// <summary>
-    /// Find a clear space on the floor to place the light beam/Multitoy.
-    /// </summary>
-    public Vector3 GetRandomToyPosition()
-    {
-        // define guardian bounds or set bounds to 0 if guardian is disabled
-        var bounds = new Bounds(Vector3.zero, OVRManager.boundary?.GetConfigured() ?? false ? OVRManager.boundary.GetDimensions(OVRBoundary.BoundaryType.PlayArea) : Vector3.zero);
-        // default position is where camera is. Shouldn't happen, but it's a fallback
-        Vector3 finalPos = new Vector3(_mainCamera.transform.position.x, GetFloorHeight(), _mainCamera.transform.position.z);
-
-        // shoot rays out from player, a few cm above ground
-        Vector3 curbHeight = finalPos + Vector3.up * 0.1f;
-        Vector3 direction = _mainCamera.transform.right;
-
-        // select the farthest candidate position
-        float farthestPosition = 0.0f;
-        int sliceCount = 4;
-        for (int i = 0; i <= sliceCount; i++)
-        {
-            LayerMask ballSpawnLayer = LayerMask.GetMask("RoomBox", "Furniture");
-            RaycastHit hit;
-            Ray ray = new Ray(curbHeight, direction);
-            Vector3 candidatePos = finalPos;
-
-            if (Physics.Raycast(ray, out hit, 100, ballSpawnLayer))
-            {
-                // get a halfway point, so beam isn't always flush against a wall
-                var posMiddle = (curbHeight + hit.point) * 0.5f;
-                // prevent from spawning outside the walls and guardian
-                if (_vrRoom.IsPositionInRoom(posMiddle, 0f) && (bounds.size.Equals(Vector3.zero) || bounds.Contains(posMiddle)))
-                {
-                    candidatePos = posMiddle;
-                }
-            }
-
-            float distanceToCandidate = Vector3.Distance(curbHeight, candidatePos);
-            if (distanceToCandidate > farthestPosition)
-            {
-                farthestPosition = distanceToCandidate;
-                finalPos = candidatePos;
-            }
-
-            direction = Quaternion.Euler(0, -180.0f / sliceCount, 0) * direction;
-        }
-
-        return MovePointAwayFromWalls(new Vector3(finalPos.x, 1.0f + GetFloorHeight(), finalPos.z), bounds);
-    }
-
-    /// <summary>
-    /// Raycasts every 45 degrees from point towards walls, move the point away from the wall if it's too close
-    /// </summary>
-    private Vector3 MovePointAwayFromWalls(Vector3 pos, Bounds bounds)
-    {
-        var point = pos;
-        var direction = Vector3.right;
-        RaycastHit hit;
-        LayerMask ballSpawnLayer = LayerMask.GetMask("RoomBox", "Furniture");
-        var attempt = 0;
-        for (int i = 0; i < 8; i++)
-        {
-            if (Physics.Raycast(point, direction, out hit, 0.5f, ballSpawnLayer))
-            {
-                var safePos = point - direction * 0.5f;
-                if (_vrRoom.IsPositionInRoom(safePos, 0f) && (bounds.size.Equals(Vector3.zero) || bounds.Contains(safePos)))
-                {
-                    point = safePos;
-                }
-                // reset count so new position gets checked too
-                i = 0;
-                attempt++;
-            }
-            direction = Quaternion.Euler(0, 45, 0) * direction;
-
-            // prevent infinite loop if multitoy can't be placed safely
-            if (attempt > 25)
-            {
-                Debug.LogError("Failed to safely move point away from walls after " + attempt + " attempts");
-                return pos;
-            }
-        }
-        return point;
-    }
-
 
     /// <summary>
     /// Adjust the desaturation range of the environment shaders.
