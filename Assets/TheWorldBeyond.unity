@@ -422,8 +422,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1927583714}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &253434480
@@ -454,7 +453,6 @@ MonoBehaviour:
   _passthroughLayer: {fileID: 7079690334011128082}
   _sceneAnchors: []
   _vrRoom: {fileID: 1791972297}
-  _lightBeam: {fileID: 0}
   _worldShockwave: {fileID: 6797792060524663370, guid: 36d2b6e19cb9893419acb5a9e56c3e5a, type: 3}
   _environmentMaterials:
   - {fileID: 2100000, guid: ee9f53df5522c3f4f96f1a43e60b79e6, type: 2}
@@ -1234,7 +1232,10 @@ PrefabInstance:
       objectReference: {fileID: 792115642}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 284114440051928315, guid: cde93055fa51ae14895cbcde3031c6e7, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1927583714}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cde93055fa51ae14895cbcde3031c6e7, type: 3}
 --- !u!114 &642375006 stripped
@@ -2243,6 +2244,11 @@ Canvas:
 --- !u!1 &1185883251 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 629008884352874049, guid: cde93055fa51ae14895cbcde3031c6e7, type: 3}
+  m_PrefabInstance: {fileID: 605989724}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1185883253 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 284114440051928315, guid: cde93055fa51ae14895cbcde3031c6e7, type: 3}
   m_PrefabInstance: {fileID: 605989724}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1190750658
@@ -10684,13 +10690,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1927583713}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.33821508, y: 0.206138, z: -0.08442313, w: 0.9143251}
-  m_LocalPosition: {x: -3.3, y: 1.45, z: -11.86}
-  m_LocalScale: {x: 1, y: 0.1, z: 5}
+  m_LocalRotation: {x: 0.34847057, y: 0.0033555478, z: -0.009218834, w: 0.93726844}
+  m_LocalPosition: {x: -0.0029888286, y: 0.657026, z: 1.0035342}
+  m_LocalScale: {x: 0.45312133, y: 0.045312136, z: 2.265607}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1198086979}
-  m_Father: {fileID: 253434479}
+  m_Father: {fileID: 1185883253}
   m_LocalEulerAnglesHint: {x: 40.79, y: 24.99, z: -1.131}
 --- !u!65 &1927583715
 BoxCollider:
