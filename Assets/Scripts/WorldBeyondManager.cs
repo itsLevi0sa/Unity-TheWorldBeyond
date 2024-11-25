@@ -250,7 +250,7 @@ public class WorldBeyondManager : MonoBehaviour
             KillControllerVibration();
             //MultiToy.Instance.SetToy(i);
             WorldBeyondEnvironment.Instance.ShowEnvironment(mixedRealityMode);
-            MultiToy.Instance.SetToy(4);
+            MultiToy.Instance.SetToy();
             if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
             //----------------MixedReality mode part---------------------------------------------------
             MixedRealityMode();         

@@ -307,58 +307,15 @@ public class MultiToy : MonoBehaviour
     /// <summary>
     /// Prepare the proper toy, depending on the story chapter.
     /// </summary>
-    public void SetToy(int i)
+    public void SetToy()
     {
-        switch (i)
-        {
-            case 1: // Title
-            case 2: //Introduction:
-                DeactivateAllToys();
-                ShowToy(false);
-                _toyIndexController = (int)ToyOption.Flashlight;
-                _toyIndexHand = (int)ToyOption.None;
-                _canSwitchToys = false;
-                _throwBallTaught = false;
-                _wallToyUnlocked = false;
-                _flashLightUnlocked = false;
-                _ballTossCooldownFactor = 1.0f;
-                break;
-            case 3: //WorldBeyondManager.GameChapter.OppyBaitsYou:
-                DeactivateAllToys();
-                ShowToy(false);
-                _canSwitchToys = false;
-                _flashLightUnlocked = false;
-                _toyFlashlight.SetLightStrength(WorldBeyondManager.Instance._usingHands ? 0.0f : 1.0f);
-                break;
-            case 4: // WorldBeyondManager.GameChapter.SearchForOppy:
-                _toyIndexController = (int)ToyOption.Flashlight;
-                _toyIndexHand = (int)ToyOption.None;
-                _flashLightUnlocked = false;
-                _toyFlashlight.SetLightStrength(WorldBeyondManager.Instance._usingHands ? 0.0f : 1.0f);
+        _toyIndexController = (int)ToyOption.Flashlight;
+        _toyIndexHand = (int)ToyOption.None;
+        _flashLightUnlocked = false;
+        _toyFlashlight.SetLightStrength(WorldBeyondManager.Instance._usingHands ? 0.0f : 1.0f);
 
-                ShowToy(true);
-                _canSwitchToys = false;
-                break;
-            case 5: //OppyExploresReality:
-                DeactivateAllToys();
-                ShowToy(true);
-                _toyIndexController = (int)ToyOption.None;
-                _toyIndexHand = (int)ToyOption.None;
-                _canSwitchToys = false;
-                _wallToyUnlocked = false;
-                break;
-            case 6: //TheGreatBeyond:
-                ShowToy(true);
-                _canSwitchToys = true;
-                if (!WorldBeyondManager.Instance._usingHands)
-                {
-                    WorldBeyondTutorial.Instance.DisplayMessage(WorldBeyondTutorial.TutorialMessage.SwitchToy);
-                }
-                break;
-            case 7: //Ending:
-                _canSwitchToys = true;
-                break;
-        }
+        ShowToy(true);
+        _canSwitchToys = false;
     }
 
 
