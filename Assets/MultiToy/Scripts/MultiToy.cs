@@ -77,7 +77,7 @@ public class MultiToy : MonoBehaviour
     /// </summary>
     void HandClosed()
     {
-        if (WorldBeyondManager.Instance.searchForOppy)
+        if (WorldBeyondManager.Instance.mixedRealityMode)
         {
             if (_toyIndexHand == (int)ToyOption.WallToy)
             {
@@ -114,7 +114,7 @@ public class MultiToy : MonoBehaviour
         Quaternion controllerRot = Quaternion.identity;
         WorldBeyondManager.Instance.GetDominantHand(ref controllerPos, ref controllerRot);
 
-        if (WorldBeyondManager.Instance.enterMixedReality == false)
+        if (WorldBeyondManager.Instance.prepareForMixedReality == false)
         {
             transform.position = controllerPos;
             transform.rotation = controllerRot;
@@ -150,7 +150,7 @@ public class MultiToy : MonoBehaviour
         {
             _ballTossCooldownFactor += Time.deltaTime;
             currentToyIndex = _toyIndexHand;
-            if (WorldBeyondManager.Instance.searchForOppy)
+            if (WorldBeyondManager.Instance.mixedRealityMode)
             {
                 Transform mainCam = WorldBeyondManager.Instance._mainCamera.transform;
                 bool handOutOfView = Vector3.Dot(mainCam.forward, (controllerPos - mainCam.position).normalized) < 0.5f;
@@ -188,7 +188,7 @@ public class MultiToy : MonoBehaviour
             }
         }
 
-        if (WorldBeyondManager.Instance.searchForOppy)
+        if (WorldBeyondManager.Instance.mixedRealityMode)
         {
             if (currentToyIndex > (int)ToyOption.None)
             {
@@ -578,7 +578,7 @@ public class MultiToy : MonoBehaviour
     /// </summary>
     private void OnApplicationFocus(bool pause)
     {
-        if (WorldBeyondManager.Instance.searchForOppy)
+        if (WorldBeyondManager.Instance.mixedRealityMode)
         {
             if (_toyIndexController < 0 || _toyIndexController >= _toys.Length || _toys[_toyIndexController] == null)
             {
@@ -601,7 +601,7 @@ public class MultiToy : MonoBehaviour
     {
         if (usingHands)
         {
-            if (WorldBeyondManager.Instance.searchForOppy)
+            if (WorldBeyondManager.Instance.mixedRealityMode)
             {
                 SetToyMesh(ToyOption.None);
             }
@@ -610,7 +610,7 @@ public class MultiToy : MonoBehaviour
         else
         {
             SetToyMesh((ToyOption)_toyIndexController);
-            if (WorldBeyondManager.Instance.searchForOppy)
+            if (WorldBeyondManager.Instance.mixedRealityMode)
             {
                 ShowPassthroughGlove(true, rightHand);
             }

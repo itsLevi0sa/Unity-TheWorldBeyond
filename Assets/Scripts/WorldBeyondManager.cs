@@ -74,8 +74,8 @@ public class WorldBeyondManager : MonoBehaviour
     private float _rightHandGrabbedBallLastDistance = Mathf.Infinity;
 
     public bool isInVoid = false;
-    public bool enterMixedReality = false;
-    public bool searchForOppy = false;
+    public bool prepareForMixedReality = false;
+    public bool mixedRealityMode = false;
 
 
     private void Awake()
@@ -214,7 +214,7 @@ public class WorldBeyondManager : MonoBehaviour
         {
             _mainCamera.backgroundColor = _cameraDark;
             if (_sceneModelLoaded) GetRoomFromScene();
-        }else if (enterMixedReality)
+        }else if (prepareForMixedReality)
         {
             //PositionTitleScreens(false);
             _mainCamera.backgroundColor = _cameraDark;
@@ -241,11 +241,11 @@ public class WorldBeyondManager : MonoBehaviour
             bool rightHandApproaching = rightRange <= handRange;
 
             MultiToy.Instance.ShowPassthroughGlove(true, _gameController == OVRInput.Controller.RTouch);
-            enterMixedReality = false;
-          
-            searchForOppy = true;
+            prepareForMixedReality = false;
+
+            mixedRealityMode = true;
             ForceChapter();// ForceChapter(GameChapter.SearchForOppy);
-            SearchForOppy();         
+            MixedRealityMode();         
         }
         bool flashlightActive = MultiToy.Instance.IsFlashlightActive();
 
@@ -300,12 +300,12 @@ public class WorldBeyondManager : MonoBehaviour
             if (holdingBall) grabbedBall.ForceVisible();
         }
     }
-    void EnterMixedReality()
+    void PrepareMixedReality()
     {
         _passthroughStylist.ResetPassthrough(0.1f);
         StartCoroutine(PlaceToyRandomly(2.0f));
     }
-    void SearchForOppy()
+    void MixedRealityMode()
     {
         VirtualRoom.Instance.HideEffectMesh();
         _passthroughStylist.ResetPassthrough(0.1f);
@@ -321,27 +321,8 @@ public class WorldBeyondManager : MonoBehaviour
         StopAllCoroutines();
         KillControllerVibration();
         //MultiToy.Instance.SetToy(i);
-        WorldBeyondEnvironment.Instance.ShowEnvironment(searchForOppy);
-
-        //if (isInVoid || enterMixedReality) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
-
-       // _pet.gameObject.SetActive(oppyExplores || greatBeyond || ending); //(int)_currentChapter >= (int)GameChapter.OppyExploresReality
-        int i = 0;
-        //if (isInVoid)
-        //{
-        //    i = 0;
-       // }
-       /*
-        if (enterMixedReality)
-        {
-            i = 3;
-        }else if (searchForOppy)
-        {
-            i = 4;
-        }
-       */
-        i = 4;
-        MultiToy.Instance.SetToy(i);
+        WorldBeyondEnvironment.Instance.ShowEnvironment(mixedRealityMode);
+        MultiToy.Instance.SetToy(4);
 
         if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
     }
@@ -460,9 +441,9 @@ public class WorldBeyondManager : MonoBehaviour
             WorldBeyondEnvironment.Instance.Initialize();
             isInVoid = false;
             // isInTitle = true;
-            enterMixedReality = true;
+            prepareForMixedReality = true;
            // ForceChapter(); //ForceChapter(GameChapter.Title);
-            EnterMixedReality();
+            PrepareMixedReality();
         }
         catch
         {
