@@ -212,10 +212,12 @@ public class WorldBeyondManager : MonoBehaviour
 
         if (isInVoid)
         {
+            _mainCamera.backgroundColor = _cameraDark;
             if (_sceneModelLoaded) GetRoomFromScene();
         }else if (enterMixedReality)
         {
             //PositionTitleScreens(false);
+            _mainCamera.backgroundColor = _cameraDark;
 
             _backgroundFadeSphere.SetActive(false);
             PassthroughStylist.PassthroughStyle normalPassthrough = new PassthroughStylist.PassthroughStyle(
@@ -321,22 +323,24 @@ public class WorldBeyondManager : MonoBehaviour
         //MultiToy.Instance.SetToy(i);
         WorldBeyondEnvironment.Instance.ShowEnvironment(searchForOppy);
 
-        if (isInVoid || enterMixedReality) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
+        //if (isInVoid || enterMixedReality) _mainCamera.backgroundColor = _cameraDark; //(int)_currentChapter < (int)GameChapter.SearchForOppy)
 
        // _pet.gameObject.SetActive(oppyExplores || greatBeyond || ending); //(int)_currentChapter >= (int)GameChapter.OppyExploresReality
         int i = 0;
-        if (isInVoid)
-        {
-            i = 0;
-        }
-        else if (enterMixedReality)
+        //if (isInVoid)
+        //{
+        //    i = 0;
+       // }
+       /*
+        if (enterMixedReality)
         {
             i = 3;
         }else if (searchForOppy)
         {
             i = 4;
         }
-
+       */
+        i = 4;
         MultiToy.Instance.SetToy(i);
 
         if (_lightBeam) { _lightBeam.gameObject.SetActive(false); }
@@ -457,7 +461,7 @@ public class WorldBeyondManager : MonoBehaviour
             isInVoid = false;
             // isInTitle = true;
             enterMixedReality = true;
-            ForceChapter(); //ForceChapter(GameChapter.Title);
+           // ForceChapter(); //ForceChapter(GameChapter.Title);
             EnterMixedReality();
         }
         catch
