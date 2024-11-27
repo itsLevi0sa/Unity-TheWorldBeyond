@@ -83,7 +83,7 @@ Material:
     - _ZWrite: 0
     m_Colors:
     - _BeamColor: {r: 0.6698113, g: 0.06740234, b: 0.06740234, a: 0}
-    - _Color: {r: 0.53333336, g: 0.7503085, b: 1, a: 1}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0.5283019, g: 0.5283019, b: 0.5283019, a: 1}
     - _InnerBeamColor: {r: 0.8679245, g: 0.26747355, b: 0.26747355, a: 0}
     - _MiddleBeamColor: {r: 0, g: 0, b: 0, a: 0}
