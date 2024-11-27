@@ -47,10 +47,11 @@ Shader "TheWorldBeyond/OppyDimension_URP"
             struct Varyings
             {
                 float4 positionHCS : SV_POSITION;
-                float3 worldNormal : TEXCOORD0;
-                float2 uv : TEXCOORD1;
-                float3 worldViewDirection : TEXCOORD2;
-                half foggingRange : TEXCOORD3;
+                float3 worldPos : TEXCOORD0;   // Pass the world position
+                float3 worldNormal : TEXCOORD1;
+                float2 uv : TEXCOORD2;
+                float3 worldViewDirection : TEXCOORD3;
+                half foggingRange : TEXCOORD4;
             };
 
             // Uniforms
@@ -79,15 +80,15 @@ Shader "TheWorldBeyond/OppyDimension_URP"
             Varyings vert(Attributes v)
             {
                 Varyings o;
-                VertexPositionInputs vertexInput = GetVertexPositionInputs(v.positionOS);
-                o.positionHCS = vertexInput.positionCS;
-                o.worldNormal = TransformObjectToWorldNormal(v.normalOS);
-                o.uv = v.uv * float2(2, 1);  // Optional, modify UV coordinates if necessary
-                float3 worldPos = TransformObjectToWorld(v.positionOS);
-                o.worldViewDirection = normalize(GetWorldSpaceViewDir(worldPos));
 
-                // Fogging range calculation
-                o.foggingRange = saturate((distance(GetCameraPositionWS(), worldPos) - _FogStartDistance) / (_FogEndDistance - _FogStartDistance));
+                // Calculate world position and transform to clip space
+                o.worldNormal = TransformObjectToWorldNormal(v.normalOS);
+                o.positionHCS = TransformObjectToHClip(v.positionOS);
+                o.worldPos = mul(unity_ObjectToWorld, v.positionOS).xyz;   // Store world position
+                o.worldViewDirection = normalize(GetWorldSpaceViewDir(o.worldPos));
+
+                // Calculate fogging range
+                o.foggingRange = saturate((distance(GetCameraPositionWS(), o.worldPos) - _FogStartDistance) / (_FogEndDistance - _FogStartDistance));
                 o.foggingRange = fastPow(o.foggingRange, _FogExponent);
                 
                 return o;
@@ -98,12 +99,12 @@ Shader "TheWorldBeyond/OppyDimension_URP"
                 // Main texture sampling
                 float4 mainTexture = SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv);
 
-                // Fogging
+                // Fogging effect
                 float4 foggingColor = SAMPLE_TEXTURECUBE(_FogCubemap, sampler_FogCubemap, i.worldViewDirection);
                 float4 foggedColor = lerp(mainTexture, foggingColor, i.foggingRange * _FogStrength);
 
                 // Distance ripple effect
-                float distanceToOppy = pow(distance(_OppyPosition, i.worldNormal), 1.5);
+                float distanceToOppy = pow(distance(_OppyPosition, i.worldPos), 1.5);
                 float distanceRipple = saturate(sin(distanceToOppy * 6 + (_Time.w * 2)) * 0.5 + 0.25);
                 distanceRipple *= _OppyRippleStrength;
 
@@ -119,13 +120,26 @@ Shader "TheWorldBeyond/OppyDimension_URP"
                 // Final color adjustment
                 finalColor = pow(finalColor, 0.455);
 
-                // Apply mask ripple effect
-                return float4(finalColor, maskRipple);
+                // Apply ripple effect and mask based on _EffectTimer
+                float radialDist = distance(i.worldPos, _EffectPosition.xyz) * 10;
+                float dist = saturate(radialDist + 5 - _EffectTimer * 50);
+                if (_EffectTimer >= 1.0) {
+                    dist = 0;
+                }
+                float alpha = lerp(dist, 1 - dist, _InvertedMask);
+                clip(alpha.r - 0.5);
+
+                // Apply ripple mask with adjusted intensity
+                half distanceToBall = distance(_OppyPosition, i.worldPos);
+                half finalRipple = saturate(sin((distanceToBall * 20) + (_Time.w * 2)) * 0.5 + 0.25) * saturate(1 - (distanceToBall * 0.5)) * 0.7;
+                finalRipple *= saturate((distanceToBall - 0.2) * 5);
+
+                return half4(finalColor, finalRipple * _MaskRippleStrength);
             }
 
             ENDHLSL
         }
     }
 
-    Fallback "Universal Forward"
+    Fallback "UniversalForward"
 }
